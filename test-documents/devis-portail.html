@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; color: #222; font-size: 12px; line-height: 1.5; }
+  .header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+  .company { font-size: 11px; }
+  .company strong { font-size: 14px; display: block; margin-bottom: 4px; }
+  .doc-ref { text-align: right; font-size: 11px; }
+  .doc-ref .title { font-size: 16px; font-weight: bold; display: block; margin-bottom: 6px; }
+  .client-box { background: #f5f5f5; padding: 12px 16px; margin-bottom: 24px; font-size: 11px; }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; background: #333; color: white; padding: 6px 10px; margin: 24px 0 10px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 11px; }
+  td, th { border: 1px solid #ccc; padding: 6px 8px; }
+  th { background: #eee; text-align: left; font-size: 10px; text-transform: uppercase; }
+  .right { text-align: right; }
+  .bold { font-weight: bold; }
+  .total-row td { background: #f0f0f0; font-weight: bold; font-size: 12px; }
+  .sig-box { margin-top: 30px; display: flex; justify-content: space-between; }
+  .sig-block { width: 45%; font-size: 10px; }
+  .footer { margin-top: 40px; font-size: 8px; color: #999; text-align: center; border-top: 1px solid #ddd; padding-top: 10px; }
+  .small { font-size: 10px; color: #666; }
+  .badge { display: inline-block; background: #e74c3c; color: white; font-size: 9px; padding: 2px 8px; border-radius: 3px; text-transform: uppercase; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="header-flex">
+  <div class="company">
+    <strong>AZUR FERMETURES</strong>
+    Zone Artisanale des Prés Verts<br>
+    14 allée des Chênes, 92150 Suresnes<br>
+    Tél : 01 47 33 28 15 — Port : 06 82 19 47 63<br>
+    contact@azur-fermetures.fr<br>
+    <span class="small">SIRET 891 234 567 00012 — APE 4332B<br>TVA FR 41 891234567</span>
+  </div>
+  <div class="doc-ref">
+    <span class="title">RAPPORT D'INTERVENTION<br>& DEVIS</span>
+    N° : <strong>INT-2026-0284</strong><br>
+    Date intervention : <strong>4 avril 2026</strong><br>
+    Technicien : <strong>K. Bouchard</strong><br>
+    <span class="badge">Dépannage urgent</span>
+  </div>
+</div>
+
+<div class="client-box">
+  <strong>Client :</strong> Syndicat des copropriétaires — Résidence Les Jardins du Parc<br>
+  <strong>Adresse :</strong> 8-12 avenue des Tilleuls, 92400 Courbevoie<br>
+  <strong>Syndic :</strong> Cabinet Durand & Associés — Réf. contrat maintenance : CM-2024-0091<br>
+  <strong>Demandeur :</strong> M. Fernandez (gardien) — Appel reçu le 04/04/2026 à 08h12<br>
+  <strong>Équipement :</strong> Portail coulissant motorisé parking sous-sol — Marque CAME, modèle BXV-600, installé en 2017 — Accès rampe véhicules Bâtiment B
+</div>
+
+<h2>1. Constat à l'arrivée (09h15)</h2>
+
+<p>À mon arrivée sur site, le portail coulissant du parking sous-sol (accès Bâtiment B) est bloqué en <strong>position ouverte</strong>. Le vantail est immobilisé à environ 95 % de sa course d'ouverture. Le moteur ne répond plus aux commandes (télécommande, bouton poussoir intérieur, interphone). Le voyant du boîtier de commande CAME ZL180 clignote en rouge (code erreur E07). Plusieurs résidents ont signalé au gardien que le portail était resté ouvert toute la nuit.</p>
+
+<p>Le système de détection véhicule (boucle magnétique) ne semble pas en cause : le défaut est antérieur à la boucle. L'alimentation électrique est présente et conforme (230V mesuré au bornier). Le rail de guidage au sol ne présente pas d'obstacle visible.</p>
+
+<h2>2. Diagnostic</h2>
+
+<p>Après examen approfondi du mécanisme et du boîtier de commande, les anomalies suivantes ont été identifiées :</p>
+
+<table>
+<tr><th style="width: 30%;">Élément</th><th style="width: 25%;">Constat</th><th style="width: 45%;">Détail</th></tr>
+<tr>
+  <td><strong>Capteur de fin de course (fermeture)</strong></td>
+  <td style="color: #e74c3c; font-weight: bold;">Défaillant</td>
+  <td>Le capteur magnétique de fin de course côté fermeture (référence CAME 119RIR259) ne transmet plus de signal au boîtier. Le câble présente une gaine fissurée sur environ 15 cm au niveau du passage dans le rail. Oxydation visible au niveau de la cosse de raccordement. Le capteur lui-même est encrassé (poussière de béton, résidus d'huile) et ne réagit plus à l'aimant. Ce défaut a provoqué l'erreur E07 (perte de référence position) et le blocage du moteur en sécurité.</td>
+</tr>
+<tr>
+  <td><strong>Dispositif parachute (anti-chute)</strong></td>
+  <td style="color: #e74c3c; font-weight: bold;">Défaillant</td>
+  <td>Le dispositif parachute mécanique, destiné à bloquer le vantail en cas de rupture de la crémaillère ou de sortie de rail, est grippé en position engagée. Le ressort de rappel est détendu et ne ramène plus le verrou en position de repos. Le mécanisme n'a visiblement pas été entretenu depuis plusieurs années (graisse séchée, accumulation de particules). Ce blocage empêche physiquement le vantail de se déplacer, même en mode manuel.</td>
+</tr>
+<tr>
+  <td><strong>Crémaillère</strong></td>
+  <td style="color: #f39c12; font-weight: bold;">Usure modérée</td>
+  <td>Jeu latéral constaté sur 3 segments (sur 8). Pas de dent cassée. Fonctionnel mais à surveiller. Remplacement à prévoir dans les 12-18 mois.</td>
+</tr>
+<tr>
+  <td><strong>Moteur CAME BXV-600</strong></td>
+  <td style="color: #27ae60;">Fonctionnel</td>
+  <td>Le moteur tourne correctement une fois le parachute désengagé manuellement. Pas de bruit anormal. Ampérage mesuré conforme (2.1A en charge, spécification constructeur : 2.5A max).</td>
+</tr>
+<tr>
+  <td><strong>Boîtier commande ZL180</strong></td>
+  <td style="color: #27ae60;">Fonctionnel</td>
+  <td>Erreur E07 effacée après réinitialisation. Paramétrage vérifié (temps ouverture, ralentissement, force). Carte en bon état.</td>
+</tr>
+<tr>
+  <td><strong>Cellules photoélectriques</strong></td>
+  <td style="color: #27ae60;">Fonctionnel</td>
+  <td>Alignement correct, lentilles propres. Test de détection OK.</td>
+</tr>
+</table>
+
+<h2>3. Mesures correctives effectuées</h2>
+
+<ol>
+  <li><strong>Désengagement manuel du parachute</strong> — Déblocage du verrou grippé, nettoyage du mécanisme à la bombe dégrippante, test de fonctionnement du ressort de rappel. Le mécanisme a été remis en état de marche provisoire mais le ressort ne garantit plus un engagement fiable à terme. <em>Remplacement recommandé.</em></li>
+  <li><strong>Nettoyage et recâblage du capteur fin de course</strong> — Nettoyage du capteur, remplacement de la cosse oxydée, pose d'une gaine thermorétractable sur la section de câble endommagée. Le capteur répond de nouveau à l'aimant mais présente un signal faible et intermittent. <em>Remplacement recommandé à court terme.</em></li>
+  <li><strong>Réinitialisation boîtier de commande</strong> — Effacement de l'erreur E07, recalibrage de la course du vantail (apprentissage fin de course ouverture/fermeture), vérification des paramètres de ralentissement et de force.</li>
+  <li><strong>Graissage général</strong> — Lubrification du rail de guidage, de la crémaillère et du pignon moteur.</li>
+  <li><strong>Test complet</strong> — 10 cycles ouverture/fermeture effectués. Fonctionnement correct. Temps de cycle mesuré : 28 secondes (conforme spécification : 25-30 sec).</li>
+</ol>
+
+<h2>4. État au départ du technicien (11h40)</h2>
+
+<p>Le portail est <strong>remis en service</strong> et opérationnel. Le vantail effectue ses cycles d'ouverture et de fermeture normalement. Les commandes (télécommande, bouton poussoir, interphone) répondent correctement. Le voyant du boîtier est vert fixe (fonctionnement normal).</p>
+
+<p>Cependant, les réparations effectuées sur le <strong>capteur fin de course</strong> et le <strong>dispositif parachute</strong> sont des mesures de remise en état provisoire. Le capteur présente un signal intermittent qui risque de provoquer une nouvelle erreur E07 à moyen terme (estimation : 2 à 6 semaines selon les conditions d'utilisation). Le ressort du parachute ne garantit plus un fonctionnement conforme aux normes de sécurité EN 12604. Le remplacement de ces deux composants est fortement recommandé.</p>
+
+<h2>5. Devis — Pièces et main-d'œuvre</h2>
+
+<table>
+<tr><th>Réf.</th><th>Désignation</th><th>Qté</th><th class="right">P.U. HT</th><th class="right">Total HT</th></tr>
+<tr><td>119RIR259</td><td>Capteur fin de course magnétique CAME (remplacement)</td><td>1</td><td class="right">87,00 €</td><td class="right">87,00 €</td></tr>
+<tr><td>119RIA061</td><td>Câble capteur avec connecteur pré-serti (3m)</td><td>1</td><td class="right">24,50 €</td><td class="right">24,50 €</td></tr>
+<tr><td>PARA-BXV</td><td>Kit parachute complet avec ressort de rappel (compatible BXV-600)</td><td>1</td><td class="right">215,00 €</td><td class="right">215,00 €</td></tr>
+<tr><td>—</td><td>Bombe dégrippante + graisse lithium (consommable)</td><td>1</td><td class="right">18,00 €</td><td class="right">18,00 €</td></tr>
+<tr><td>MO-DEP</td><td>Main-d'œuvre intervention dépannage urgent (04/04, 2h30)</td><td>1</td><td class="right">185,00 €</td><td class="right">185,00 €</td></tr>
+<tr><td>MO-REMP</td><td>Main-d'œuvre remplacement capteur + parachute (intervention planifiée, estimée 1h30)</td><td>1</td><td class="right">120,00 €</td><td class="right">120,00 €</td></tr>
+<tr><td>DEPL</td><td>Frais de déplacement (zone Île-de-France)</td><td>2</td><td class="right">35,00 €</td><td class="right">70,00 €</td></tr>
+<tr class="total-row"><td colspan="4" class="right">TOTAL HT</td><td class="right">719,50 €</td></tr>
+<tr class="total-row"><td colspan="4" class="right">TVA 20 %</td><td class="right">143,90 €</td></tr>
+<tr class="total-row"><td colspan="4" class="right">TOTAL TTC</td><td class="right">863,40 €</td></tr>
+</table>
+
+<p class="small"><strong>Dont déjà facturé</strong> (intervention dépannage du 04/04) : 185,00 € HT + 35,00 € déplacement + 18,00 € consommable = <strong>238,00 € HT (285,60 € TTC)</strong><br>
+<strong>Reste à engager</strong> (remplacement pièces, intervention planifiée) : <strong>481,50 € HT (577,80 € TTC)</strong></p>
+
+<p class="small">Conditions : Devis valable 30 jours. Règlement à 30 jours fin de mois. Pièces garanties 2 ans. Main-d'œuvre garantie 1 an. Intervention planifiable sous 5-7 jours ouvrés après acceptation du devis.</p>
+
+<div class="sig-box">
+  <div class="sig-block">
+    <p><strong>Le technicien</strong><br>K. Bouchard<br>Azur Fermetures<br><br><br><em>Signé sur tablette le 04/04/2026</em></p>
+  </div>
+  <div class="sig-block">
+    <p><strong>Le client</strong> (bon pour accord)<br><br><br><br><br>Date : ___/___/______<br>Signature :</p>
+  </div>
+</div>
+
+<div class="footer">
+  AZUR FERMETURES — SARL au capital de 15 000 € — SIRET 891 234 567 00012 — APE 4332B — TVA FR 41 891234567<br>
+  RCS Nanterre — Assurance décennale : SMABTP n° 1098765 — Certification QUALIBAT 4411
+</div>
+
+</body>
+</html>

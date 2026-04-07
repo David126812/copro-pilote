@@ -16,6 +16,7 @@ import VoiceAgent from "./pages/VoiceAgent";
 import Channels from "./pages/Channels";
 import Settings from "./pages/Settings";
 import PushSimulation from "./pages/PushSimulation";
+import Signalements from "./pages/Signalements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -97,6 +98,7 @@ const App = () => (
             <Route path="/voice-agent" element={<VoiceAgent />} />
             <Route path="/channels" element={<Channels />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/signalements" element={<Signalements />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
