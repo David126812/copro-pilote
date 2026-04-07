@@ -1,13 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { Calendar, FolderOpen, ArrowRight, Siren, Mic, MessageSquare, Clock } from "lucide-react";
-import { dossiers, syndicContact } from "@/data/mockData";
+
 import BottomNav from "@/components/BottomNav";
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const activeDossiers = dossiers.filter((d) => d.status !== "termine");
-  
 
   const events = [
     { label: "Intervention plombier (Bât. B)", date: "14 fév." },

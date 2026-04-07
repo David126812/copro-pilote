@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, FileText, Image, Mail, Sparkles, Share2, Paperclip, UserCog, ChevronDown, FileIcon, MessageCircle, Ellipsis, Link, Download, Bell, Send, X } from "lucide-react";
-import { dossiers, csMembers, statusLabels } from "@/data/mockData";
+import { csMembers, statusLabels } from "@/data/mockData";
+import { useDossier } from "@/hooks/useDossiers";
 import { getPublishedUpdates, addPublishedUpdate } from "@/data/updatesStore";
 import type { InternalNote } from "@/components/InternalNotes";
 import InternalNotes from "@/components/InternalNotes";
@@ -80,8 +81,8 @@ const mockNotes: Record<string, InternalNote[]> = {
 const DossierDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dossier = dossiers.find((d) => d.id === id);
-  const [assignee, setAssignee] = useState(dossier?.responsible || "");
+  const { data: dossier, isLoading } = useDossier(id);
+  const [assignee, setAssignee] = useState("");
   const [showAssignee, setShowAssignee] = useState(false);
   const [docsExpanded, setDocsExpanded] = useState(false);
   const [timelineExpanded, setTimelineExpanded] = useState(false);
@@ -98,6 +99,18 @@ const DossierDetail = () => {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => {
+    if (dossier?.responsible) setAssignee(dossier.responsible);
+  }, [dossier?.responsible]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-card flex items-center justify-center p-10">
+        <p className="text-muted-foreground">Chargement…</p>
+      </div>
+    );
+  }
 
   if (!dossier) {
     return (

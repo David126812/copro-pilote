@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Sparkles, Bell, X } from "lucide-react";
-import { dossiers, statusLabels, statusOptions } from "@/data/mockData";
+import { statusLabels, statusOptions } from "@/data/mockData";
+import { useDossier } from "@/hooks/useDossiers";
 import { addPublishedUpdate } from "@/data/updatesStore";
 
 const aiSuggestions: Record<string, { status: string; nextStep: string; comment: string }> = {
@@ -16,7 +17,7 @@ const aiSuggestions: Record<string, { status: string; nextStep: string; comment:
 const StatusUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dossier = dossiers.find((d) => d.id === id);
+  const { data: dossier } = useDossier(id);
 
   const suggestion = id ? aiSuggestions[id] : undefined;
 

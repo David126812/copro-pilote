@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, ArrowLeft, User, Clock, Bell, Sparkles, AlertTriangle, ArrowRight, Mic } from "lucide-react";
-import { dossiers, DossierStatus, Dossier } from "@/data/mockData";
+import { DossierStatus, Dossier } from "@/data/mockData";
+import { useDossiers } from "@/hooks/useDossiers";
 import StatusBadge from "@/components/StatusBadge";
 import BottomNav from "@/components/BottomNav";
 
@@ -54,6 +55,7 @@ const aiPriorities = [
 
 const DossiersList = () => {
   const navigate = useNavigate();
+  const { data: dossiers = [], isLoading } = useDossiers();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterValue>("all");
   const [viewMode, setViewMode] = useState<"classic" | "ai">("classic");
@@ -76,6 +78,7 @@ const DossiersList = () => {
         {/* Header */}
         <div className="mb-5">
           <h1 className="text-[22px] font-bold text-foreground">Dossiers</h1>
+          {isLoading && <p className="text-xs text-muted-foreground mt-1">Chargement…</p>}
         </div>
 
         {/* View mode toggle */}
