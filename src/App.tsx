@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,34 +20,61 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const PhoneFrame = ({ children }: { children: React.ReactNode }) => (
-  <div className="min-h-screen flex items-center justify-center py-5 px-4"
-    style={{ background: "linear-gradient(145deg, #0F172A 0%, #1E293B 50%, #334155 100%)" }}
-  >
-    <div>
-      <div className="text-center mb-8">
-        <h2 className="text-sm font-semibold tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'Outfit', sans-serif" }}>
-          Prototype • Conseil Syndical
-        </h2>
-      </div>
-      <div className="relative w-[375px] h-[812px] rounded-[44px] overflow-hidden bg-card"
-        style={{ boxShadow: "0 0 0 10px #1a1a1a, 0 0 0 12px #333, 0 20px 80px rgba(0,0,0,0.35)" }}
-      >
-        {/* Dynamic Island */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[126px] h-[36px] bg-[#000] rounded-b-[24px] rounded-t-none z-50" style={{ borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} />
-        {/* Screen */}
-        <div className="h-full overflow-y-auto pt-[54px] [&::-webkit-scrollbar]:hidden">
-          {children}
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as any).standalone === true;
+    const isNarrow = window.innerWidth <= 500;
+    setIsMobile(isStandalone || isNarrow);
+
+    const onChange = () => setIsMobile(
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as any).standalone === true ||
+      window.innerWidth <= 500
+    );
+    window.addEventListener("resize", onChange);
+    return () => window.removeEventListener("resize", onChange);
+  }, []);
+  return isMobile;
+};
+
+const PhoneFrame = ({ children }: { children: React.ReactNode }) => {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return <div className="min-h-screen bg-card">{children}</div>;
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center py-5 px-4"
+      style={{ background: "linear-gradient(145deg, #0F172A 0%, #1E293B 50%, #334155 100%)" }}
+    >
+      <div>
+        <div className="text-center mb-8">
+          <h2 className="text-sm font-semibold tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'Outfit', sans-serif" }}>
+            Prototype • Conseil Syndical
+          </h2>
+        </div>
+        <div className="relative w-[375px] h-[812px] rounded-[44px] overflow-hidden bg-card"
+          style={{ boxShadow: "0 0 0 10px #1a1a1a, 0 0 0 12px #333, 0 20px 80px rgba(0,0,0,0.35)" }}
+        >
+          {/* Dynamic Island */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[126px] h-[36px] bg-[#000] rounded-b-[24px] rounded-t-none z-50" style={{ borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} />
+          {/* Screen */}
+          <div className="h-full overflow-y-auto pt-[54px] [&::-webkit-scrollbar]:hidden">
+            {children}
+          </div>
+        </div>
+        <div className="text-center mt-5">
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
+            Cliquez pour naviguer entre les écrans
+          </p>
         </div>
       </div>
-      <div className="text-center mt-5">
-        <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-          Cliquez pour naviguer entre les écrans
-        </p>
-      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
