@@ -17,6 +17,7 @@ import Channels from "./pages/Channels";
 import Settings from "./pages/Settings";
 import PushSimulation from "./pages/PushSimulation";
 import Signalements from "./pages/Signalements";
+import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -99,6 +100,7 @@ const App = () => (
             <Route path="/channels" element={<Channels />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/signalements" element={<Signalements />} />
+            <Route path="/events" element={<Events />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

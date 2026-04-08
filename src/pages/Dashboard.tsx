@@ -98,7 +98,7 @@ const Dashboard = () => {
               <Calendar className="h-[16px] w-[16px] text-primary" />
               <h2 className="text-[13px] font-bold text-foreground">Prochains événements</h2>
             </div>
-            <button onClick={() => navigate("/dossiers")} className="text-[11px] font-semibold text-primary">
+            <button onClick={() => navigate("/events")} className="text-[11px] font-semibold text-primary">
               Tout voir
             </button>
           </div>
