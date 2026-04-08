@@ -93,9 +93,14 @@ const Dashboard = () => {
 
         {/* Prochains événements */}
         <section className="bg-card rounded-[14px] border border-border p-4 shadow-sm mb-3.5">
-          <div className="flex items-center gap-2 mb-3">
-            <Calendar className="h-[16px] w-[16px] text-primary" />
-            <h2 className="text-[13px] font-bold text-foreground">Prochains événements</h2>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-[16px] w-[16px] text-primary" />
+              <h2 className="text-[13px] font-bold text-foreground">Prochains événements</h2>
+            </div>
+            <button onClick={() => navigate("/dossiers")} className="text-[11px] font-semibold text-primary">
+              Tout voir
+            </button>
           </div>
           <div className="space-y-1">
             {events.map((ev, i) => (
