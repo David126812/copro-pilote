@@ -63,29 +63,7 @@ const Dashboard = () => {
           </div>
         </button>
 
-        {/* Quick actions + Stats row */}
-        {/* Signalements inbox */}
-        {nouveauCount > 0 && (
-          <button
-            onClick={() => navigate("/signalements")}
-            className="w-full rounded-[14px] border border-amber-200 bg-amber-50 p-4 mb-5 text-left hover:border-amber-300 transition active:scale-[0.98]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 relative">
-                <Inbox className="h-5 w-5 text-amber-600" />
-                <span className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 rounded-full bg-amber-500 text-white text-[11px] font-bold flex items-center justify-center">
-                  {nouveauCount}
-                </span>
-              </div>
-              <div className="flex-1">
-                <h2 className="text-[14px] font-bold text-foreground">{nouveauCount} signalement{nouveauCount > 1 ? "s" : ""} en attente</h2>
-                <p className="text-[12px] text-muted-foreground">À qualifier par le conseil syndical</p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-amber-500" />
-            </div>
-          </button>
-        )}
-
+        {/* Quick actions */}
         <div className="grid grid-cols-3 gap-2.5 mb-5">
           <button
             onClick={() => navigate("/signaler-incident")}
@@ -111,8 +89,13 @@ const Dashboard = () => {
             onClick={() => navigate("/signalements")}
             className="flex flex-col items-center gap-1.5 py-4 rounded-[14px] bg-card border border-border shadow-sm hover:border-primary/30 transition active:scale-[0.98] relative"
           >
-            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center relative">
               <Inbox className="h-[18px] w-[18px] text-amber-600" />
+              {nouveauCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 h-4 min-w-[16px] px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {nouveauCount}
+                </span>
+              )}
             </div>
             <span className="text-[11px] font-semibold text-foreground leading-tight text-center">Signalements</span>
           </button>
