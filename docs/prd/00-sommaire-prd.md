@@ -19,6 +19,7 @@ Septrion est une PWA mobile-first qui centralise les dossiers de copropriété e
 | # | Section | Fichier |
 |---|---------|---------|
 | 1 | Executive Summary & Classification | [01-executive-summary.md](./01-executive-summary.md) |
+| 1b | Hypothèses Non Vérifiées | [01b-hypotheses-non-verifiees.md](./01b-hypotheses-non-verifiees.md) |
 | 2 | Critères de Succès | [02-criteres-succes.md](./02-criteres-succes.md) |
 | 3 | Scope Produit | [03-scope-produit.md](./03-scope-produit.md) |
 | 4 | Parcours Utilisateur | [04-parcours-utilisateur.md](./04-parcours-utilisateur.md) |
