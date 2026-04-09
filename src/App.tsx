@@ -21,6 +21,7 @@ import Signalements from "./pages/Signalements";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Onboarding from "./pages/Onboarding";
 
 const queryClient = new QueryClient();
 
@@ -91,6 +92,7 @@ const App = () => (
             <Route path="/" element={<Navigate to="/auth" replace />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/login" element={<Navigate to="/auth" replace />} />
+            <Route path="/onboarding" element={<AuthGuard><Onboarding /></AuthGuard>} />
             <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
             <Route path="/dossiers" element={<AuthGuard><DossiersList /></AuthGuard>} />
             <Route path="/dossiers/:id" element={<AuthGuard><DossierDetail /></AuthGuard>} />
