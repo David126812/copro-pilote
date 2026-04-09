@@ -12,6 +12,8 @@ export interface Signalement {
   document_url: string | null;
   status: "nouveau" | "qualifie" | "rejete";
   dossier_id: string | null;
+  copro_id: string | null;
+  location: string | null;
   raw_analysis: any;
   created_at: string;
 }
@@ -41,7 +43,7 @@ export function useQualifySignalement() {
           ? [{ name: signalement.document_url.split("/").pop() || "Document", type: "WhatsApp" }]
           : [];
 
-        // Create dossier
+        // Create dossier with copro_id
         const { data: dossier, error: dossierError } = await supabase.from("dossiers").insert({
           name: signalement.name,
           status: "en_cours",
@@ -50,9 +52,10 @@ export function useQualifySignalement() {
           next_step: signalement.next_step || "",
           last_action: signalement.summary || "",
           created_via_agent: true,
+          copro_id: signalement.copro_id,
           timeline: [{
             date: dateLabel,
-            label: `Signalement WhatsApp${signalement.sender_name ? ` (${signalement.sender_name})` : ""}`,
+            label: `Signalement${signalement.sender_name ? ` (${signalement.sender_name})` : ""}`,
             done: true,
           }],
           documents,
@@ -80,6 +83,57 @@ export function useQualifySignalement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["signalements"] });
+      queryClient.invalidateQueries({ queryKey: ["dossiers"] });
+    },
+  });
+}
+
+export function useAttachSignalement() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ signalementId, dossierId }: { signalementId: string; dossierId: string }) => {
+      // Update signalement to point to dossier
+      const { error } = await supabase.from("signalements")
+        .update({ status: "qualifie" as const, dossier_id: dossierId })
+        .eq("id", signalementId);
+      if (error) throw error;
+
+      // Add timeline event to dossier
+      const { data: dossier } = await supabase.from("dossiers").select("timeline").eq("id", dossierId).single();
+      const timeline = dossier?.timeline || [];
+      const dateLabel = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+      timeline.push({ date: dateLabel, label: "Nouveau signalement rattaché", done: true });
+
+      await supabase.from("dossiers").update({ timeline }).eq("id", dossierId);
+
+      return dossierId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["signalements"] });
+      queryClient.invalidateQueries({ queryKey: ["dossiers"] });
+    },
+  });
+}
+
+export function useUpdateDossierStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ dossierId, newStatus }: { dossierId: string; newStatus: "en_cours" | "bloque" | "termine" }) => {
+      // Add timeline event
+      const { data: dossier } = await supabase.from("dossiers").select("timeline").eq("id", dossierId).single();
+      const timeline = dossier?.timeline || [];
+      const dateLabel = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+      const statusLabels = { en_cours: "Dossier remis en cours", bloque: "Dossier marqué bloqué", termine: "Dossier terminé" };
+      timeline.push({ date: dateLabel, label: statusLabels[newStatus], done: true });
+
+      const { error } = await supabase.from("dossiers")
+        .update({ status: newStatus, timeline })
+        .eq("id", dossierId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dossiers"] });
     },
   });
