@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { analyzeMessage } from "../_shared/analyzeMessage.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -8,17 +9,6 @@ const WHATSAPP_PHONE_NUMBER_ID = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID")!;
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  const chunkSize = 8192;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    const chunk = bytes.subarray(i, i + chunkSize);
-    binary += String.fromCharCode(...chunk);
-  }
-  return btoa(binary);
-}
 
 // ============================================
 // WhatsApp webhook verification
@@ -63,131 +53,61 @@ async function uploadToStorage(buffer: ArrayBuffer, mimeType: string, filename: 
 }
 
 // ============================================
-// Analyze with Claude
+// Match sender phone → copro_id via profiles
 // ============================================
-const ANALYZE_PROMPT = `Tu es un assistant pour un conseil syndical de copropriété. Analyse le contenu envoyé via WhatsApp.
+async function findCoproByPhone(phone: string): Promise<string | null> {
+  // Normalize phone: remove spaces, ensure + prefix
+  const normalized = phone.replace(/\s/g, "");
 
-Réponds UNIQUEMENT en JSON valide (pas de markdown) :
-{
-  "name": "Titre court et clair du dossier (ex: Réfection toiture Bât A, Panne portail parking B)",
-  "urgency": "normal" ou "urgent" ou "critique",
-  "nextStep": "Prochaine action concrète recommandée",
-  "summary": "Résumé factuel en 2-3 phrases des points clés"
-}`;
+  const { data } = await supabase
+    .from("profiles")
+    .select("copro_id")
+    .eq("whatsapp_phone", normalized)
+    .maybeSingle();
 
-async function analyzeMessage(text: string, mediaBuffer?: ArrayBuffer, mediaMimeType?: string): Promise<{
-  name: string; urgency: string; nextStep: string; summary: string;
-}> {
-  if (ANTHROPIC_API_KEY) {
-    try {
-      const content: any[] = [];
-      if (mediaBuffer && mediaMimeType) {
-        const b64 = arrayBufferToBase64(mediaBuffer);
-        if (mediaMimeType.includes("pdf")) {
-          content.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: b64 } });
-        } else if (mediaMimeType.includes("image")) {
-          content.push({ type: "image", source: { type: "base64", media_type: mediaMimeType, data: b64 } });
-        }
-      }
-      if (text) content.push({ type: "text", text: `Message : "${text}"` });
-      content.push({ type: "text", text: ANALYZE_PROMPT });
+  if (data?.copro_id) return data.copro_id;
 
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 800, messages: [{ role: "user", content }] }),
-      });
-      const data = await res.json();
-      if (data.content?.[0]?.text) {
-        const parsed = JSON.parse(data.content[0].text.replace(/```json\n?|\n?```/g, "").trim());
-        if (parsed.name) return parsed;
-      }
-    } catch (e) { console.error("Claude analyze failed:", e); }
-  }
+  // Try without + prefix
+  const withoutPlus = normalized.startsWith("+") ? normalized.slice(1) : normalized;
+  const { data: data2 } = await supabase
+    .from("profiles")
+    .select("copro_id")
+    .eq("whatsapp_phone", withoutPlus)
+    .maybeSingle();
 
-  // Fallback
-  let urgency = "normal";
-  const lower = text.toLowerCase();
-  for (const [kw, lvl] of Object.entries({ panne: "urgent", fuite: "urgent", bloqué: "urgent", inondation: "critique", incendie: "critique", urgent: "urgent", cassé: "urgent" })) {
-    if (lower.includes(kw)) { urgency = lvl; break; }
-  }
-  return { name: text.slice(0, 60) || "Signalement WhatsApp", urgency, nextStep: "À qualifier par le conseil syndical", summary: text };
+  return data2?.copro_id || null;
 }
 
 // ============================================
-// Find similar existing dossier with Claude
-// ============================================
-async function findSimilarDossier(analysis: { name: string; summary: string }): Promise<{ id: string; name: string } | null> {
-  const { data: dossiers } = await supabase.from("dossiers").select("id, name, last_action").order("updated_at", { ascending: false }).limit(20);
-  if (!dossiers || dossiers.length === 0) return null;
-
-  try {
-    const dossierList = dossiers.map((d: any) => `- ID: ${d.id} | Nom: "${d.name}"`).join("\n");
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 200,
-        messages: [{
-          role: "user",
-          content: `Dossiers existants :\n${dossierList}\n\nNouveau signalement : "${analysis.name}" — ${analysis.summary}\n\nCe nouveau signalement correspond-il à un dossier existant (même sujet/problème) ?\nRéponds UNIQUEMENT en JSON : {"match": true, "id": "...", "name": "..."} ou {"match": false}`,
-        }],
-      }),
-    });
-    const data = await res.json();
-    if (data.content?.[0]?.text) {
-      const parsed = JSON.parse(data.content[0].text.replace(/```json\n?|\n?```/g, "").trim());
-      if (parsed.match && parsed.id) return { id: parsed.id, name: parsed.name };
-    }
-  } catch (e) { console.error("Similarity check failed:", e); }
-
-  return null;
-}
-
-// ============================================
-// Create signalement (inbox, before qualification)
+// Create signalement with copro_id + location
 // ============================================
 async function createSignalement(
-  analysis: { name: string; urgency: string; nextStep: string; summary: string },
-  documentUrl?: string, senderName?: string, senderPhone?: string,
+  analysis: { name: string; urgency: string; location: string | null; nextStep: string; summary: string },
+  copro_id: string | null,
+  documentUrl?: string,
+  senderName?: string,
+  senderPhone?: string,
 ): Promise<string> {
   const { data, error } = await supabase.from("signalements").insert({
     name: analysis.name,
     urgency: analysis.urgency,
+    location: analysis.location,
     summary: analysis.summary,
     next_step: analysis.nextStep,
     sender_name: senderName || null,
     sender_phone: senderPhone || null,
     document_url: documentUrl || null,
     status: "nouveau",
+    copro_id: copro_id,
     raw_analysis: analysis,
   }).select("id").single();
+
   if (error) throw new Error(`Insert signalement failed: ${error.message}`);
   return data.id;
 }
 
 // ============================================
-// Create dossier (used when qualifying a signalement)
-// ============================================
-async function createDossier(
-  analysis: { name: string; urgency: string; nextStep: string; summary: string },
-  documentUrl?: string, senderName?: string,
-): Promise<string> {
-  const dateLabel = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
-  const documents = documentUrl ? [{ name: documentUrl.split("/").pop() || "Document", type: "WhatsApp" }] : [];
-  const { data, error } = await supabase.from("dossiers").insert({
-    name: analysis.name, status: "en_cours", urgency: analysis.urgency, responsible: "",
-    next_step: analysis.nextStep, last_action: analysis.summary, created_via_agent: true,
-    timeline: [{ date: dateLabel, label: `Signalement WhatsApp${senderName ? ` (${senderName})` : ""}`, done: true }],
-    documents, prestataires: [], syndic_history: [],
-  }).select("id").single();
-  if (error) throw new Error(`Insert failed: ${error.message}`);
-  return data.id;
-}
-
-// ============================================
-// Send WhatsApp messages
+// Send WhatsApp reply
 // ============================================
 async function sendTextReply(to: string, text: string) {
   const res = await fetch(`https://graph.facebook.com/v21.0/${WHATSAPP_PHONE_NUMBER_ID}/messages`, {
@@ -198,13 +118,6 @@ async function sendTextReply(to: string, text: string) {
   const data = await res.json();
   console.log("WhatsApp send result:", JSON.stringify(data));
   return data;
-}
-
-async function sendDuplicateQuestion(to: string, newName: string, existingName: string, existingId: string) {
-  const appUrl = `https://david126812.github.io/copro-pilote/dossiers/${existingId}`;
-  await sendTextReply(to,
-    `Un dossier similaire existe deja :\n\n"${existingName}"\n${appUrl}\n\nVotre signalement : "${newName}"\n\nEst-ce le meme sujet ?\nRepondez OUI ou NON`
-  );
 }
 
 // ============================================
@@ -218,24 +131,6 @@ Deno.serve(async (req) => {
     try {
       const body = await req.json();
 
-      // === Direct PDF test mode ===
-      if (body.test_direct_pdf && body.pdf_base64) {
-        const binaryStr = atob(body.pdf_base64);
-        const bytes = new Uint8Array(binaryStr.length);
-        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
-        const analysis = await analyzeMessage(body.caption || "", bytes.buffer, "application/pdf");
-        const similar = await findSimilarDossier(analysis);
-        if (similar) {
-          return new Response(JSON.stringify({ similar, analysis, action: "would_ask_confirmation" }), {
-            status: 200, headers: { "Content-Type": "application/json" },
-          });
-        }
-        const dossierId = await createDossier(analysis, undefined, body.sender_name || "Test");
-        return new Response(JSON.stringify({ success: true, dossierId, analysis }), {
-          status: 200, headers: { "Content-Type": "application/json" },
-        });
-      }
-
       // === WhatsApp webhook ===
       const entry = body.entry?.[0];
       const change = entry?.changes?.[0];
@@ -245,49 +140,21 @@ Deno.serve(async (req) => {
       const senderPhone = message.from;
       const senderName = change?.value?.contacts?.[0]?.profile?.name || "";
 
-      // --- Handle replies to duplicate question (OUI/NON or button) ---
-      const isButtonReply = message.type === "interactive" && message.interactive?.type === "button_reply";
+      // Skip replies (OUI/NON) — simplified for MVP
       const textBody = message.text?.body?.trim().toUpperCase() || "";
-      const isOuiNon = message.type === "text" && (textBody === "OUI" || textBody === "NON");
-
-      if (isButtonReply || isOuiNon) {
-        const buttonId = isButtonReply
-          ? message.interactive.button_reply.id
-          : (textBody === "OUI" ? "same_yes" : "same_no");
-        console.log(`Reply: ${buttonId} from ${senderPhone}`);
-
-        // Fetch pending dossier for this user
-        const { data: pending } = await supabase
-          .from("pending_dossiers")
-          .select("*")
-          .eq("sender_phone", senderPhone)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
-
-        if (!pending) {
-          await sendTextReply(senderPhone, "Aucun signalement en attente.");
-          return new Response("OK", { status: 200 });
-        }
-
-        if (buttonId === "same_yes") {
-          // User confirmed it's the same dossier — don't create
-          const appUrl = `https://david126812.github.io/copro-pilote/dossiers/${pending.matched_dossier_id}`;
-          await sendTextReply(senderPhone, `Compris, pas de nouveau dossier créé.\n\nLe dossier existant :\n"${pending.matched_dossier_name}"\n${appUrl}`);
-          await supabase.from("pending_dossiers").delete().eq("id", pending.id);
-        } else if (buttonId === "same_no") {
-          // User said it's a new topic — create the dossier
-          const analysis = pending.analysis as any;
-          const dossierId = await createDossier(analysis, pending.document_url || undefined, pending.sender_name || senderName);
-          const appUrl = `https://david126812.github.io/copro-pilote/dossiers/${dossierId}`;
-          await sendTextReply(senderPhone, `Nouveau dossier créé : "${analysis.name}"\n\n${appUrl}`);
-          await supabase.from("pending_dossiers").delete().eq("id", pending.id);
-        }
-
+      if (message.type === "text" && (textBody === "OUI" || textBody === "NON")) {
         return new Response("OK", { status: 200 });
       }
 
-      // --- Handle text / document / image messages ---
+      // --- Match sender to copro ---
+      const copro_id = await findCoproByPhone(senderPhone);
+      if (!copro_id) {
+        console.log(`Unknown sender: ${senderPhone} — no matching profile`);
+        await sendTextReply(senderPhone, "Votre numéro n'est pas associé à un compte Septrion. Inscrivez-vous sur l'app d'abord.");
+        return new Response("OK", { status: 200 });
+      }
+
+      // --- Extract text and media ---
       let text = "";
       if (message.type === "text") {
         text = message.text?.body || "";
@@ -295,7 +162,6 @@ Deno.serve(async (req) => {
         text = message[message.type]?.caption || "";
       }
 
-      // Download media if present
       let documentUrl: string | undefined;
       let mediaBuffer: ArrayBuffer | undefined;
       let mediaMimeType: string | undefined;
@@ -312,23 +178,28 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Analyze with Claude
-      const analysis = await analyzeMessage(text, mediaBuffer, mediaMimeType);
+      // --- Analyze with shared pipeline ---
+      const analysis = await analyzeMessage(ANTHROPIC_API_KEY, text, mediaBuffer, mediaMimeType);
       console.log("Analysis:", JSON.stringify(analysis));
 
-      // Create signalement (goes to inbox for CS qualification)
-      const signalementId = await createSignalement(analysis, documentUrl, senderName, senderPhone);
-      console.log(`Signalement created: ${signalementId} — "${analysis.name}"`);
+      // --- Create signalement with copro_id ---
+      const signalementId = await createSignalement(analysis, copro_id, documentUrl, senderName, senderPhone);
+      console.log(`Signalement created: ${signalementId} — "${analysis.name}" — copro: ${copro_id}`);
 
-      const appUrl = `https://david126812.github.io/copro-pilote/signalements`;
+      // --- Reply to sender ---
+      const locationInfo = analysis.location ? `\nLocalisation : ${analysis.location}` : "";
       await sendTextReply(senderPhone,
-        `Signalement recu : "${analysis.name}"\nUrgence : ${analysis.urgency}\n\nLe conseil syndical va qualifier ce signalement.\n${appUrl}`
+        `Signalement reçu : "${analysis.name}"\nUrgence : ${analysis.urgency}${locationInfo}\n\nLe conseil syndical va qualifier ce signalement.`
       );
 
-      return new Response(JSON.stringify({ success: true }), { status: 200, headers: { "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ success: true, signalementId }), {
+        status: 200, headers: { "Content-Type": "application/json" },
+      });
     } catch (error) {
       console.error("Webhook error:", error);
-      return new Response(JSON.stringify({ error: String(error) }), { status: 200, headers: { "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: String(error) }), {
+        status: 200, headers: { "Content-Type": "application/json" },
+      });
     }
   }
 
