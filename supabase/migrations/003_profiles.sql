@@ -1,6 +1,6 @@
 -- Migration 003: Create profiles table (extension of auth.users)
 create table public.profiles (
-  id text primary key references auth.users(id) on delete cascade,
+  id uuid primary key references auth.users(id) on delete cascade,
   first_name text not null default '',
   copro_id text references public.coproprietes(id),
   whatsapp_phone text not null default '',
