@@ -46,7 +46,7 @@ workflowType: 'prd'
 
 Les membres bénévoles de conseils syndicaux en copropriétés françaises de +20 lots gèrent des dossiers complexes — travaux, sinistres, contrats, relances syndic — en marge de leur vie professionnelle et personnelle. L'information est dispersée entre WhatsApp, emails, PDF et extranets. Les sujets passent à travers : oublis, confusions, manque de suivi. Quand un copropriétaire demande "on en est où avec l'ascenseur ?", reconstituer la réponse prend 30 minutes. Quand un membre quitte le CS, sa mémoire part avec lui.
 
-Septrion est une PWA mobile-first qui centralise les dossiers de copropriété et décharge la mémoire des bénévoles. Un membre du CS forward un document par WhatsApp ou l'ajoute depuis l'app. L'IA (Claude Sonnet) analyse le contenu, extrait le titre, l'urgence, un résumé et la prochaine action recommandée. Le signalement structuré apparaît dans une inbox de triage. Le membre qualifie, rattache à un dossier existant ou en crée un nouveau. Depuis le dossier, il retrouve tout l'historique, les documents et les notes — puis partage l'info aux autres membres CS par push notification ou notification WhatsApp.
+Septrion est une PWA mobile-first qui centralise les dossiers de copropriété et décharge la mémoire des bénévoles. Un membre du CS forward un document par WhatsApp ou l'ajoute depuis l'app. L'IA (Claude Sonnet) analyse le contenu, extrait le titre, l'urgence, un résumé et la prochaine action recommandée. Le signalement structuré apparaît dans une inbox de triage. Le membre qualifie, rattache à un dossier existant ou en crée un nouveau. Depuis le dossier, il retrouve tout l'historique et les documents. Le système notifie automatiquement le membre CS par WhatsApp et email quand un nouveau signalement arrive ou quand le digest est envoyé.
 
 Le marché est en inflexion : les obligations réglementaires 2025-2026 (DPE collectif, PPPT, extranet obligatoire, facturation électronique) génèrent un volume massif de documents que le CS doit absorber. Les outils existants ciblent le syndic (Syndic AI, Genius.immo, Bellman) ou proposent au CS une saisie manuelle sans intelligence (Conseil Syndical IO, Domino.immo). Aucun ne combine ingestion automatique, analyse IA et gestion longitudinale de dossiers au service direct du conseil syndical.
 
@@ -111,7 +111,7 @@ Pas de seuils de performance arbitraires. Le principe directeur est : **bien fai
 
 - L'analyse IA produit des résultats cohérents et exploitables sur des documents réels (PDF, images, emails forwardés, scans)
 - Le flux WhatsApp → signalement fonctionne de bout en bout sans intervention manuelle
-- Les push notifications arrivent sur les appareils des testeurs (Android confirmé, iOS après install PWA)
+- Les notifications WhatsApp et email arrivent de manière fiable aux testeurs
 - Les données sont correctement stockées et persistantes dans Supabase
 - Le digest hebdo se déclenche manuellement et contient un résumé pertinent
 
@@ -120,31 +120,44 @@ Pas de seuils de performance arbitraires. Le principe directeur est : **bien fai
 **Analytics PostHog** (autocapture + events custom) :
 - `signalement_qualified` — signalement transformé en dossier
 - `dossier_viewed` — consultation d'un dossier
-- `notification_sent` — push envoyée aux membres CS
-- `link_shared` — lien partageable copié
+- `notification_sent` — notification WhatsApp/email envoyée
 - `document_uploaded` — fichier ajouté manuellement
 - `digest_clicked` — clic depuis la notification du digest
-- Rétention J+1, J+3, J+5 par utilisateur identifié (prénom + copro)
+- Rétention J+1, J+3, J+5 par utilisateur authentifié
 
 ## Scope Produit
 
 ### MVP — Minimum Viable Product
 
-- **Onboarding** : flow visuel 5 écrans (explication → install PWA → profil → WhatsApp → premier dossier)
-- **Ingestion WhatsApp** : agent avec analyse IA (Claude Sonnet) → signalement structuré
-- **Upload manuel** : bouton "+" sur la page dossiers → même pipeline IA
+**Principe :** Produit fonctionnel à 100%, pas un brouillon. Les testeurs doivent pouvoir l'utiliser sur la durée sans perte de données.
+
+**Job #1 :** Créer, consulter ou alimenter un dossier via l'interface ou WhatsApp, avec aide IA pour la saisie, l'analyse et le digest.
+
+- **Authentification** : inscription par numéro de téléphone + mot de passe. Le numéro lie le compte WhatsApp à l'app (matching `sender_phone`). Persistance des données garantie.
+- **Onboarding** : stepper séquentiel — explication visuelle → inscription (numéro + mdp) → profil (prénom, nom copropriété, nombre de lots avec +/−) → connexion WhatsApp → premier dossier
+- **Ingestion WhatsApp** : agent avec analyse IA → signalement structuré (titre, urgence, localisation si détectée, résumé, prochaine action)
+- **Création in-app** : page "Signaler un incident" via bouton "+" — saisie manuelle OU upload fichier avec auto-complétion IA (au choix de l'utilisateur). Upload sans auto-complétion = simple pièce jointe.
 - **Inbox triage** : qualifier / rejeter un signalement → créer ou rattacher à un dossier
-- **Détail dossier** : résumé IA, chronologie, documents, notes internes
-- **Communication** : push notification aux membres CS + notification WhatsApp sortante (fallback push, mêmes infos + lien app) + bouton de partage avec écran de confirmation (flux UI uniquement — pas de livraison côté résident pour le MVP)
-- **Dashboard** : événements récents, mises à jour, accès rapides
-- **Digest hebdo** : déclenché manuellement pendant le test (automatisation cron post-MVP)
-- **Analytics** : PostHog (pageview, autocapture, identification par testeur)
-- **Pré-chargement** : 3-4 dossiers seed par copro test à partir de documents dummy (le testeur peut ajouter ses propres documents s'il le souhaite)
-- **RGPD minimum** : politique de confidentialité, DPA Anthropic + Supabase, mention IA visible, consentement push
+- **Détail dossier** : résumé IA, chronologie, documents attachés, statut (en cours / bloqué / terminé) avec transitions
+- **Dashboard** : remontée automatique d'informations clés depuis les dossiers (dossiers actifs, bloqués, dernières mises à jour). Création manuelle d'événements = bouton visible "Prochainement".
+- **Partage (cosmétique immersif)** : UI de partage avec choix "résidents" ou "CS uniquement", placeholders pré-remplis avec exemples. Le testeur "envoie" et reçoit lui-même la notification — démo du flux complet.
+- **Notifications automatiques** : WhatsApp + email au testeur uniquement (loop solo). Déclenchées par : nouveau signalement, digest, partage cosmétique. Pas de push PWA.
+- **Digest** : déclenché manuellement pendant le test (automatisation cron post-MVP). Résumé IA envoyé par WhatsApp + email.
+- **Analytics** : PostHog (pageview, autocapture, identification par utilisateur authentifié)
+- **Pré-chargement** : 3-4 dossiers seed par copro test à partir de documents dummy (le testeur peut ajouter ses propres documents)
+- **RGPD minimum** : politique de confidentialité, DPA Anthropic + Supabase, mention IA visible
+
+**UI non fonctionnelle ("Prochainement") :**
+- Bouton "Communiquer aux résidents" (visible, non fonctionnel au-delà du cosmétique)
+- Bouton "Créer un événement" sur le dashboard
 
 ### Croissance (Post-MVP)
 
-- Authentification Supabase (magic link email)
+- Push notifications natives (React Native)
+- Notifications multi-utilisateurs (tous les membres CS, pas juste le testeur)
+- Notes internes sur les dossiers
+- Communication fonctionnelle vers les résidents (WhatsApp Business sortant)
+- Page publique de consultation dossier en lecture seule (lien partageable)
 - Email comme 2ème canal d'entrée
 - Rattachement IA suggeré dans l'inbox de triage
 - Résumé IA dynamique enrichi à chaque événement
@@ -167,9 +180,9 @@ Pas de seuils de performance arbitraires. Le principe directeur est : **bien fai
 
 **Louise**, 32 ans, trésorière du CS d'une copro de 40 lots. Gère la copro le soir après le travail.
 
-Louise reçoit une push notification : "Nouveau signalement — Panne ascenseur Bât C". Un copropriétaire a envoyé un message WhatsApp au numéro Septrion. Elle ouvre l'app, arrive sur la page signalements. Le signalement est déjà structuré : titre, urgence "urgent", résumé factuel, prochaine action recommandée.
+Louise reçoit une notification WhatsApp : "Nouveau signalement — Panne ascenseur Bât C". Un copropriétaire a envoyé un message WhatsApp au numéro Septrion. Elle ouvre l'app (authentifiée par numéro + mdp), arrive sur la page signalements. Le signalement est déjà structuré : titre, urgence "urgent", localisation "Ascenseur — Bâtiment C", résumé factuel, prochaine action recommandée.
 
-Louise n'a rien eu à saisir. Elle qualifie le signalement : crée un nouveau dossier "Ascenseur Bât C", ajoute une note "Appeler OTIS demain matin", et envoie une notification aux autres membres du CS. Temps total : 2 minutes.
+Louise n'a rien eu à saisir. Elle qualifie le signalement : crée un nouveau dossier "Ascenseur Bât C". Le système lui envoie automatiquement une notification de confirmation (WhatsApp + email). Temps total : 2 minutes.
 
 ### Parcours 2 — Louise forward un document reçu par email
 
@@ -191,7 +204,7 @@ Quand le testeur ouvrira l'app après l'onboarding, il verra un dashboard déjà
 
 Louise consulte le dossier "Fuite parking souterrain". Le plombier est intervenu, la fuite est réparée. Elle change le statut du dossier de "en cours" à "terminé". Le dossier reste consultable mais est visuellement distingué des dossiers actifs.
 
-Autre cas : le syndic ne répond plus depuis 2 semaines sur le dossier "Ravalement façade". Louise le passe en "bloqué" et ajoute une note "Syndic injoignable depuis le 25 mars". Le dossier apparaît en évidence sur le dashboard comme nécessitant une action.
+Autre cas : le syndic ne répond plus depuis 2 semaines sur le dossier "Ravalement façade". Louise le passe en "bloqué". Le dossier apparaît en évidence sur le dashboard comme nécessitant une action.
 
 **Transitions possibles :**
 - en cours → bloqué (problème identifié)
@@ -208,7 +221,7 @@ Autre cas : le syndic ne répond plus depuis 2 semaines sur le dossier "Ravaleme
 
 | Parcours | Capacités requises |
 |----------|-------------------|
-| 1 — Signalement entrant | Push notification, inbox signalements, qualification, création/rattachement dossier, notes internes, notification CS |
+| 1 — Signalement entrant | Notification WhatsApp/email, inbox signalements, qualification, création/rattachement dossier |
 | 2 — Forward document | Ingestion WhatsApp + upload app, analyse IA (PDF), qualification, chronologie dossier |
 | 3 — Setup testeur | Ingestion manuelle, qualification, pré-chargement seed (dummy), déclenchement digest manuel |
 | 4 — Transition statut | Changement de statut dossier (en cours/bloqué/terminé), ajout de note contextuelle |
@@ -222,7 +235,7 @@ Autre cas : le syndic ne répond plus depuis 2 semaines sur le dossier "Ravaleme
 - DPA signé avec Anthropic (documents analysés = sous-traitance IA au sens RGPD)
 - DPA signé avec Supabase (hébergement données)
 - Base légale : intérêt légitime du CS dans l'exercice de son mandat (art. 6.1.f RGPD)
-- Consentement explicite opt-in pour les push notifications
+- Consentement explicite opt-in pour les notifications (WhatsApp + email)
 - Documentation des flux de données : WhatsApp → Supabase Storage → Claude API → Supabase DB → App
 
 **EU AI Act (transparence) :**
@@ -240,21 +253,17 @@ Autre cas : le syndic ne répond plus depuis 2 semaines sur le dossier "Ravaleme
 - Les messages ingérés peuvent contenir des données personnelles de tiers (copropriétaires mentionnés dans les documents).
 - Mitigation post-MVP : email comme 2ème canal d'entrée.
 
-**Notification WhatsApp sortante (MVP) :**
-- Fallback aux push notifications PWA — garantit la délivrance sur tous les appareils, iOS inclus
-- Contenu : mêmes infos que la push (titre signalement, urgence) + lien pour ouvrir l'app
-- Nécessite un template de message pré-approuvé par Meta
-- Coût négligeable pour le test (10 testeurs × 5 jours)
-- Sera remplacé par des push natives après passage en React Native (post-MVP)
+**Notifications (MVP) :**
+- Canal principal : WhatsApp sortant (template pré-approuvé Meta) + email
+- Contenu : titre signalement, urgence, lien pour ouvrir l'app
+- MVP = loop solo : seul le testeur reçoit ses propres notifications
+- Pas de push PWA pour le MVP (fiabilité non garantie, surtout iOS)
+- Coût WhatsApp négligeable pour le test (10 testeurs)
 
 **Données & stockage :**
 - Documents uploadés stockés dans Supabase Storage
 - Limite 10MB par fichier (free tier Supabase)
 - Pas de données de santé — pas de certification HDS nécessaire
-
-**Push notifications PWA :**
-- Android : pleinement supporté
-- iOS (16.4+) : nécessite installation PWA sur l'écran d'accueil. Fiabilité limitée si l'app n'a pas été ouverte récemment — d'où le fallback WhatsApp.
 
 ### Risques Domaine
 
@@ -267,11 +276,12 @@ Les risques domaine sont consolidés dans le tableau unique de la section "Risqu
 - **SPA React** (Vite + Tailwind + shadcn/ui) — navigation sans rechargement de page
 - **PWA installable** — manifest, service worker, icône écran d'accueil
 - **Mobile-first** — conçue pour l'usage smartphone, desktop secondaire
+- **Authentification** — Supabase Auth avec numéro de téléphone + mot de passe. Le numéro sert de clé de liaison avec le compte WhatsApp.
 
 ### Navigateurs cibles
 
 - Chrome Android (cible principale)
-- Safari iOS 16.4+ (push supporté uniquement après installation PWA)
+- Safari iOS 16.4+
 - Desktop : non prioritaire, mais fonctionnel via navigateur
 
 ### Temps réel
@@ -317,7 +327,7 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 | **Marché** | Les testeurs n'adoptent pas le forward WhatsApp spontanément | Pré-chargement dummy + simulation par David pendant le test |
 | **Marché** | 5 jours trop court pour observer le moment retrieval | Documents seed pour créer la masse critique dès jour 1 |
 | **Technique** | L'analyse IA produit des résumés insuffisants sur des docs réels | Itérer le prompt Claude avant le test. Kill criterion : >50% de corrections |
-| **Technique** | Push iOS non fiable | Fallback notification WhatsApp sortante |
+| **Technique** | Notifications non délivrées | Double canal WhatsApp + email pour maximiser la délivrabilité |
 | **Ressource** | Équipe de 3, scope ambitieux | Scope verrouillé, pas de feature creep. Focus sur la qualité du flow principal |
 | **Réglementaire** | DPA non signés avant le test | Action préalable obligatoire : signer DPA Anthropic + Supabase avant de lancer les testeurs |
 | **Réglementaire** | Syndic invoque le RGPD pour bloquer l'accès aux documents | Hors scope MVP — le CS ingère ses propres documents |
@@ -326,72 +336,78 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 
 ## Exigences Fonctionnelles
 
+### Authentification
+
+- **FR1 :** Le nouvel utilisateur peut créer un compte avec son numéro de téléphone et un mot de passe
+- **FR2 :** Le système peut lier le numéro de téléphone au compte WhatsApp pour le matching des messages entrants
+- **FR3 :** Un utilisateur authentifié peut se connecter avec son numéro + mot de passe
+- **FR4 :** Un utilisateur authentifié peut rester connecté entre les sessions (persistance de session)
+
 ### Onboarding
 
-- **FR1 :** Le nouvel utilisateur peut suivre un flow de 5 écrans séquentiels avant d'accéder au dashboard
-- **FR2 :** L'utilisateur peut voir une explication visuelle du fonctionnement de Septrion (écran 1)
-- **FR3 :** L'utilisateur peut recevoir les instructions d'installation PWA sur son écran d'accueil (écran 2)
-- **FR4 :** L'utilisateur peut saisir son prénom et le nom de sa copropriété (écran 3)
-- **FR5 :** L'utilisateur peut ajouter le contact Septrion WhatsApp à son téléphone (écran 4)
-- **FR6 :** L'utilisateur peut envoyer son premier document via WhatsApp et voir le signalement apparaître en temps réel dans l'app (écran 5)
+- **FR5 :** Le nouvel utilisateur peut suivre un stepper séquentiel après inscription avant d'accéder au dashboard
+- **FR6 :** L'utilisateur peut voir une explication visuelle du fonctionnement de Septrion
+- **FR7 :** L'utilisateur peut recevoir les instructions d'installation PWA sur son écran d'accueil
+- **FR8 :** L'utilisateur peut saisir son prénom, le nom de sa copropriété et le nombre de lots (sélecteur +/−)
+- **FR9 :** L'utilisateur peut ajouter le contact Septrion WhatsApp à son téléphone
+- **FR10 :** L'utilisateur peut envoyer son premier document via WhatsApp et voir le signalement apparaître en temps réel dans l'app
 
 ### Ingestion de Documents
 
-- **FR7 :** Un utilisateur peut forwarder un document à l'agent WhatsApp Septrion (PDF, image, texte)
-- **FR8 :** Un utilisateur peut uploader un document depuis l'app via le bouton "+" (PDF, image)
-- **FR9 :** Le système peut limiter la taille des fichiers uploadés à 10MB
-- **FR10 :** Le système peut analyser automatiquement chaque document ingéré via l'IA et produire un titre, un niveau d'urgence, un résumé et une prochaine action recommandée
-- **FR11 :** Le système peut traiter des documents de types variés : PDF, images/photos, texte brut WhatsApp
-- **FR12 :** Le système peut créer automatiquement un signalement structuré dans l'inbox à partir de l'analyse IA
+- **FR11 :** Un utilisateur peut forwarder un document à l'agent WhatsApp Septrion (PDF, image, texte)
+- **FR12 :** Un utilisateur peut créer un signalement depuis l'app via le bouton "+" — saisie manuelle des champs (titre, description, urgence, localisation)
+- **FR13 :** Un utilisateur peut attacher un fichier (PDF, image) à un signalement créé depuis l'app — le fichier est stocké sans analyse IA
+- **FR14 :** Un utilisateur peut déclencher l'auto-complétion IA sur un fichier attaché — les champs du formulaire se pré-remplissent (titre, urgence, localisation, résumé). L'utilisateur peut modifier avant soumission.
+- **FR15 :** Le système peut limiter la taille des fichiers uploadés à 10MB
+- **FR16 :** Le système peut analyser automatiquement chaque document et produire un titre, un niveau d'urgence, une localisation (si détectable), un résumé et une prochaine action recommandée
+- **FR17 :** Le système peut traiter des documents de types variés : PDF, images/photos, texte brut WhatsApp
+- **FR18 :** Le système peut créer automatiquement un signalement structuré dans l'inbox à partir de l'analyse IA
 
 ### Triage des Signalements
 
-- **FR13 :** Un membre CS peut consulter la liste des signalements en attente de qualification
-- **FR14 :** Un membre CS peut qualifier un signalement en créant un nouveau dossier
-- **FR15 :** Un membre CS peut qualifier un signalement en le rattachant à un dossier existant
-- **FR16 :** Un membre CS peut rejeter un signalement non pertinent
-- **FR17 :** La page signalements peut se mettre à jour en temps réel quand un nouveau signalement arrive
+- **FR19 :** Un membre CS peut consulter la liste des signalements en attente de qualification
+- **FR20 :** Un membre CS peut qualifier un signalement en créant un nouveau dossier
+- **FR21 :** Un membre CS peut qualifier un signalement en le rattachant à un dossier existant
+- **FR22 :** Un membre CS peut rejeter un signalement non pertinent
+- **FR23 :** La page signalements peut se mettre à jour en temps réel quand un nouveau signalement arrive
 
 ### Gestion des Dossiers
 
-- **FR18 :** Un membre CS peut consulter la liste de tous les dossiers
-- **FR19 :** Un membre CS peut consulter le détail d'un dossier : résumé IA, niveau d'urgence, prochaine action
-- **FR20 :** Un membre CS peut consulter la chronologie des événements d'un dossier
-- **FR21 :** Un membre CS peut consulter les documents attachés à un dossier
-- **FR22 :** Un membre CS peut ajouter une note interne à un dossier
-- **FR23 :** Un membre CS peut voir le statut d'un dossier (en cours, bloqué, terminé)
-- **FR23b :** Un membre CS peut changer le statut d'un dossier (en cours ↔ bloqué ↔ terminé)
+- **FR24 :** Un membre CS peut consulter la liste de tous les dossiers
+- **FR25 :** Un membre CS peut consulter le détail d'un dossier : résumé IA, niveau d'urgence, prochaine action
+- **FR26 :** Un membre CS peut consulter la chronologie des événements d'un dossier
+- **FR27 :** Un membre CS peut consulter les documents attachés à un dossier
+- **FR28 :** Un membre CS peut voir le statut d'un dossier (en cours, bloqué, terminé)
+- **FR29 :** Un membre CS peut changer le statut d'un dossier (en cours ↔ bloqué ↔ terminé)
 
 ### Notifications & Communication
 
-- **FR24 :** Un membre CS peut envoyer une notification push aux autres membres CS depuis un dossier
-- **FR25 :** Le système peut envoyer une notification WhatsApp sortante aux membres CS (fallback push) avec les mêmes infos + lien vers l'app
-- **FR26 :** Un membre CS peut recevoir une push notification quand un nouveau signalement arrive
-- **FR27 :** Un membre CS peut initier un partage de dossier et voir un écran de confirmation (flux UI uniquement, pas de livraison côté résident pour le MVP)
+- **FR30 :** Le système peut envoyer automatiquement une notification WhatsApp + email au testeur quand un nouveau signalement arrive
+- **FR31 :** Le système peut envoyer automatiquement une notification WhatsApp + email au testeur quand le digest est envoyé
+- **FR32 :** Un membre CS peut initier un "partage" depuis un dossier — UI avec choix "résidents" ou "CS uniquement", placeholders pré-remplis avec exemples de messages. Le testeur reçoit lui-même la notification (loop solo cosmétique).
 
 ### Dashboard & Digest
 
-- **FR28 :** Un membre CS peut consulter un dashboard avec les événements récents, les mises à jour et des accès rapides
-- **FR29 :** Un administrateur peut déclencher manuellement l'envoi d'un digest aux membres CS
-- **FR30 :** Le digest peut contenir un résumé IA des dossiers actifs, bloqués et des signalements en attente
-- **FR31 :** Le digest peut être envoyé sous forme de push notification et de notification WhatsApp
+- **FR33 :** Un membre CS peut consulter un dashboard avec remontée automatique des informations clés depuis les dossiers (dossiers actifs, bloqués, dernières mises à jour, signalements en attente)
+- **FR34 :** Un administrateur peut déclencher manuellement l'envoi d'un digest au testeur
+- **FR35 :** Le digest peut contenir un résumé IA des dossiers actifs, bloqués et des signalements en attente
+- **FR36 :** Le digest peut être envoyé par WhatsApp + email
 
 ### Analytics
 
-- **FR32 :** Le système peut identifier chaque utilisateur dans l'outil d'analytics via son prénom et sa copropriété
-- **FR33 :** Le système peut traquer automatiquement les pages visitées et les interactions utilisateur
-- **FR34 :** Le système peut enregistrer les events custom : signalement qualifié, dossier consulté, notification envoyée, lien partagé, document uploadé, digest cliqué
+- **FR37 :** Le système peut identifier chaque utilisateur authentifié dans l'outil d'analytics
+- **FR38 :** Le système peut traquer automatiquement les pages visitées et les interactions utilisateur
+- **FR39 :** Le système peut enregistrer les events custom : signalement qualifié, dossier consulté, notification envoyée, document uploadé, digest cliqué
 
 ### Administration (Setup Testeur)
 
-- **FR35 :** Un administrateur peut ingérer des documents dummy via WhatsApp pour pré-charger des dossiers seed
-- **FR36 :** Un administrateur peut qualifier et créer des dossiers à partir des signalements seed
+- **FR40 :** Un administrateur peut ingérer des documents dummy via WhatsApp pour pré-charger des dossiers seed
+- **FR41 :** Un administrateur peut qualifier et créer des dossiers à partir des signalements seed
 
 ### Conformité
 
-- **FR37 :** L'utilisateur peut consulter la politique de confidentialité depuis l'app
-- **FR38 :** L'utilisateur peut voir une mention visible que les résumés sont générés par IA
-- **FR39 :** L'utilisateur peut donner son consentement explicite opt-in pour les notifications push
+- **FR42 :** L'utilisateur peut consulter la politique de confidentialité depuis l'app
+- **FR43 :** L'utilisateur peut voir une mention visible que les résumés sont générés par IA
 
 ## Exigences Non-Fonctionnelles
 
@@ -407,7 +423,7 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 
 - Le webhook WhatsApp doit traiter chaque message entrant sans perte — un document forwardé ne peut pas disparaître silencieusement
 - Si l'analyse IA échoue (timeout, document corrompu), le signalement est créé avec un statut d'erreur plutôt que perdu
-- Les push notifications et notifications WhatsApp sortantes doivent être envoyées dans un délai raisonnable (minutes, pas heures)
+- Les notifications WhatsApp et email doivent être envoyées dans un délai raisonnable (minutes, pas heures)
 
 ### Performance
 
