@@ -20,6 +20,7 @@ import PushSimulation from "./pages/PushSimulation";
 import Signalements from "./pages/Signalements";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -103,7 +104,8 @@ const App = () => (
             <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
             <Route path="/signalements" element={<AuthGuard><Signalements /></AuthGuard>} />
             <Route path="/events" element={<AuthGuard><Events /></AuthGuard>} />
-            
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </PhoneFrame>
