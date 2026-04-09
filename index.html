@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>CoPro Pilot</title>
-    <meta name="description" content="Gérez les dossiers de votre copropriété en quelques secondes" />
+    <title>Septrion</title>
+    <meta name="description" content="Votre copropriété, toujours à jour" />
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
@@ -14,26 +14,16 @@
     <!-- iOS PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="CoPro Pilot" />
+    <meta name="apple-mobile-web-app-title" content="Septrion" />
     <link rel="apple-touch-icon" href="/icon-192.svg" />
 
     <!-- OG -->
-    <meta property="og:title" content="CoPro Pilot" />
-    <meta property="og:description" content="Gérez les dossiers de votre copropriété en quelques secondes" />
+    <meta property="og:title" content="Septrion" />
+    <meta property="og:description" content="Votre copropriété, toujours à jour" />
     <meta property="og:type" content="website" />
   </head>
 
   <body style="margin:0;min-height:100vh">
-    <script>
-      // Handle SPA redirects from 404.html
-      (function() {
-        var q = window.location.search;
-        if (q.indexOf('?p=') === 0) {
-          var path = decodeURIComponent(q.slice(3));
-          window.history.replaceState(null, '', path);
-        }
-      })();
-    </script>
     <div id="root" style="min-height:100vh"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

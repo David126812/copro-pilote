@@ -1,7 +1,7 @@
 {
-  "name": "CoPro Pilot",
-  "short_name": "CoPro Pilot",
-  "description": "Gérez les dossiers de votre copropriété en quelques secondes",
+  "name": "Septrion",
+  "short_name": "Septrion",
+  "description": "Votre copropriété, toujours à jour",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0a0f1a",
