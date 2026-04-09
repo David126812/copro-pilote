@@ -187,6 +187,18 @@ Quand le testeur ouvrira l'app après l'onboarding, il verra un dashboard déjà
 
 À mi-parcours du test (jour 2-3), David déclenche manuellement le digest pour tester la boucle de rétention.
 
+### Parcours 4 — Louise fait évoluer le statut d'un dossier
+
+Louise consulte le dossier "Fuite parking souterrain". Le plombier est intervenu, la fuite est réparée. Elle change le statut du dossier de "en cours" à "terminé". Le dossier reste consultable mais est visuellement distingué des dossiers actifs.
+
+Autre cas : le syndic ne répond plus depuis 2 semaines sur le dossier "Ravalement façade". Louise le passe en "bloqué" et ajoute une note "Syndic injoignable depuis le 25 mars". Le dossier apparaît en évidence sur le dashboard comme nécessitant une action.
+
+**Transitions possibles :**
+- en cours → bloqué (problème identifié)
+- en cours → terminé (sujet résolu)
+- bloqué → en cours (problème débloqué)
+- terminé → en cours (sujet rouvert)
+
 ### Parcours post-MVP (noté pour la suite)
 
 - **Retrieval** — Louise retrouve une info en 10 secondes quand un voisin l'interpelle, copie le lien partageable et l'envoie dans le groupe WhatsApp de la copro. Le résident consulte le résumé sans app.
@@ -199,6 +211,7 @@ Quand le testeur ouvrira l'app après l'onboarding, il verra un dashboard déjà
 | 1 — Signalement entrant | Push notification, inbox signalements, qualification, création/rattachement dossier, notes internes, notification CS |
 | 2 — Forward document | Ingestion WhatsApp + upload app, analyse IA (PDF), qualification, chronologie dossier |
 | 3 — Setup testeur | Ingestion manuelle, qualification, pré-chargement seed (dummy), déclenchement digest manuel |
+| 4 — Transition statut | Changement de statut dossier (en cours/bloqué/terminé), ajout de note contextuelle |
 
 ## Exigences Domaine
 
@@ -327,7 +340,7 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 - **FR7 :** Un utilisateur peut forwarder un document à l'agent WhatsApp Septrion (PDF, image, texte)
 - **FR8 :** Un utilisateur peut uploader un document depuis l'app via le bouton "+" (PDF, image)
 - **FR9 :** Le système peut limiter la taille des fichiers uploadés à 10MB
-- **FR10 :** Le système peut analyser automatiquement chaque document ingéré via l'IA (Claude Sonnet) et produire un titre, un niveau d'urgence, un résumé et une prochaine action recommandée
+- **FR10 :** Le système peut analyser automatiquement chaque document ingéré via l'IA et produire un titre, un niveau d'urgence, un résumé et une prochaine action recommandée
 - **FR11 :** Le système peut traiter des documents de types variés : PDF, images/photos, texte brut WhatsApp
 - **FR12 :** Le système peut créer automatiquement un signalement structuré dans l'inbox à partir de l'analyse IA
 
@@ -347,6 +360,7 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 - **FR21 :** Un membre CS peut consulter les documents attachés à un dossier
 - **FR22 :** Un membre CS peut ajouter une note interne à un dossier
 - **FR23 :** Un membre CS peut voir le statut d'un dossier (en cours, bloqué, terminé)
+- **FR23b :** Un membre CS peut changer le statut d'un dossier (en cours ↔ bloqué ↔ terminé)
 
 ### Notifications & Communication
 
@@ -364,8 +378,8 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 
 ### Analytics
 
-- **FR32 :** Le système peut identifier chaque utilisateur dans PostHog via son prénom et sa copropriété
-- **FR33 :** Le système peut traquer automatiquement les pages visitées et les interactions (autocapture)
+- **FR32 :** Le système peut identifier chaque utilisateur dans l'outil d'analytics via son prénom et sa copropriété
+- **FR33 :** Le système peut traquer automatiquement les pages visitées et les interactions utilisateur
 - **FR34 :** Le système peut enregistrer les events custom : signalement qualifié, dossier consulté, notification envoyée, lien partagé, document uploadé, digest cliqué
 
 ### Administration (Setup Testeur)
@@ -383,20 +397,20 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 
 ### Sécurité & Vie Privée
 
-- Les documents uploadés et stockés dans Supabase Storage ne sont pas accessibles publiquement sans lien direct
-- Les communications entre l'app et Supabase utilisent HTTPS
-- Les appels à l'API Claude transmettent les documents via connexion chiffrée
+- Les documents uploadés et stockés ne sont pas accessibles publiquement sans lien direct
+- Les communications entre l'app et le backend utilisent HTTPS
+- Les appels à l'API d'analyse IA transmettent les documents via connexion chiffrée
 - Les données personnelles des copropriétaires présentes dans les documents sont traitées conformément au RGPD (cf. section Exigences Domaine)
-- Aucun document n'est conservé côté Claude après analyse (API stateless, pas de training sur les données)
+- Aucun document n'est conservé côté fournisseur IA après analyse (API stateless, pas de training sur les données)
 
 ### Fiabilité des Intégrations
 
 - Le webhook WhatsApp doit traiter chaque message entrant sans perte — un document forwardé ne peut pas disparaître silencieusement
-- Si l'analyse IA échoue (timeout Claude, document corrompu), le signalement est créé avec un statut d'erreur plutôt que perdu
+- Si l'analyse IA échoue (timeout, document corrompu), le signalement est créé avec un statut d'erreur plutôt que perdu
 - Les push notifications et notifications WhatsApp sortantes doivent être envoyées dans un délai raisonnable (minutes, pas heures)
 
 ### Performance
 
 - Pas de seuils chiffrés imposés pour le MVP
 - L'expérience utilisateur doit rester fluide : navigation instantanée entre les pages, chargement des dossiers sans attente perceptible
-- L'analyse IA est asynchrone — le testeur n'attend pas devant un écran de chargement. Le signalement apparaît quand il est prêt (temps réel via Supabase Realtime)
+- L'analyse IA est asynchrone — le testeur n'attend pas devant un écran de chargement. Le signalement apparaît quand il est prêt (mise à jour temps réel)

@@ -28,6 +28,18 @@ Quand le testeur ouvrira l'app après l'onboarding, il verra un dashboard déjà
 
 À mi-parcours du test (jour 2-3), David déclenche manuellement le digest pour tester la boucle de rétention.
 
+## Parcours 4 — Louise fait évoluer le statut d'un dossier
+
+Louise consulte le dossier "Fuite parking souterrain". Le plombier est intervenu, la fuite est réparée. Elle change le statut du dossier de "en cours" à "terminé". Le dossier reste consultable mais est visuellement distingué des dossiers actifs.
+
+Autre cas : le syndic ne répond plus depuis 2 semaines sur le dossier "Ravalement façade". Louise le passe en "bloqué" et ajoute une note "Syndic injoignable depuis le 25 mars". Le dossier apparaît en évidence sur le dashboard comme nécessitant une action.
+
+**Transitions possibles :**
+- en cours → bloqué (problème identifié)
+- en cours → terminé (sujet résolu)
+- bloqué → en cours (problème débloqué)
+- terminé → en cours (sujet rouvert)
+
 ## Parcours post-MVP (noté pour la suite)
 
 - **Retrieval** — Louise retrouve une info en 10 secondes quand un voisin l'interpelle, copie le lien partageable et l'envoie dans le groupe WhatsApp de la copro. Le résident consulte le résumé sans app.
@@ -40,5 +52,6 @@ Quand le testeur ouvrira l'app après l'onboarding, il verra un dashboard déjà
 | 1 — Signalement entrant | Push notification, inbox signalements, qualification, création/rattachement dossier, notes internes, notification CS |
 | 2 — Forward document | Ingestion WhatsApp + upload app, analyse IA (PDF), qualification, chronologie dossier |
 | 3 — Setup testeur | Ingestion manuelle, qualification, pré-chargement seed (dummy), déclenchement digest manuel |
+| 4 — Transition statut | Changement de statut dossier (en cours/bloqué/terminé), ajout de note contextuelle |
 
 ---
