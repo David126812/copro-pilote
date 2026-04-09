@@ -134,7 +134,7 @@ Pas de seuils de performance arbitraires. Le principe directeur est : **bien fai
 **Job #1 :** Créer, consulter ou alimenter un dossier via l'interface ou WhatsApp, avec aide IA pour la saisie, l'analyse et le digest.
 
 - **Authentification** : inscription par numéro de téléphone + mot de passe. Le numéro lie le compte WhatsApp à l'app (matching `sender_phone`). Persistance des données garantie.
-- **Onboarding** : stepper séquentiel — explication visuelle → inscription (numéro + mdp) → profil (prénom, nom copropriété, nombre de lots avec +/−) → connexion WhatsApp → premier dossier
+- **Onboarding** : stepper 5 étapes — explication visuelle → inscription + profil fusionnés (numéro, mdp, email optionnel, prénom, copro, opt-in) → installation PWA → WhatsApp → premier document. Nombre de lots déplacé dans Settings.
 - **Ingestion WhatsApp** : agent avec analyse IA → signalement structuré (titre, urgence, localisation si détectée, résumé, prochaine action)
 - **Création in-app** : page "Signaler un incident" via bouton "+" — saisie manuelle OU upload fichier avec auto-complétion IA (au choix de l'utilisateur). Upload sans auto-complétion = simple pièce jointe.
 - **Inbox triage** : qualifier / rejeter un signalement → créer ou rattacher à un dossier
@@ -344,12 +344,12 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 
 ### Onboarding
 
-- **FR5 :** Le nouvel utilisateur peut suivre un stepper séquentiel après inscription avant d'accéder au dashboard
-- **FR6 :** L'utilisateur peut voir une explication visuelle du fonctionnement de Septrion
-- **FR7 :** L'utilisateur peut recevoir les instructions d'installation PWA sur son écran d'accueil
-- **FR8 :** L'utilisateur peut saisir son prénom, le nom de sa copropriété et le nombre de lots (sélecteur +/−)
-- **FR9 :** L'utilisateur peut ajouter le contact Septrion WhatsApp à son téléphone
-- **FR10 :** L'utilisateur peut envoyer son premier document via WhatsApp et voir le signalement apparaître en temps réel dans l'app
+- **FR5 :** Le nouvel utilisateur peut suivre un stepper de 5 étapes après inscription avant d'accéder au dashboard
+- **FR6 :** L'utilisateur peut voir une explication visuelle du fonctionnement de Septrion (étape 1)
+- **FR7 :** L'utilisateur peut s'inscrire et renseigner son profil sur un même écran : numéro, mdp, email optionnel, prénom, copropriété, opt-in notifications (étape 2)
+- **FR8 :** L'utilisateur peut recevoir les instructions d'installation PWA sur son écran d'accueil (étape 3)
+- **FR9 :** L'utilisateur peut voir comment ajouter le contact Septrion WhatsApp et forwarder un document (étape 4)
+- **FR10 :** L'utilisateur peut uploader un document, utiliser un document exemple, ou explorer l'app directement (étape 5)
 
 ### Ingestion de Documents
 
@@ -413,9 +413,14 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 ### Assistant IA
 
 - **FR45 :** Un membre CS peut poser une question à l'assistant IA par texte depuis l'app
-- **FR46 :** Un membre CS peut poser une question à l'assistant IA par la voix depuis l'app
-- **FR47 :** L'assistant IA peut rechercher dans les dossiers de la copropriété et fournir une réponse contextualisée (résumé, statut, dernière action, responsable)
-- **FR48 :** L'assistant IA peut proposer des actions suite à une question (consulter le dossier, créer un signalement)
+- **FR46 :** Un membre CS peut poser une question à l'assistant IA par la voix depuis l'app (transcription via Whisper)
+- **FR47 :** L'assistant IA peut charger le contexte des dossiers et signalements de la copropriété et fournir une réponse synthétique et contextualisée (résumé, statut, dernière action, responsable)
+- **FR48 :** L'assistant IA peut proposer des actions contextuelles suite à une question (consulter le dossier, créer un signalement)
+- **FR49 :** L'assistant IA peut afficher des suggestions de questions au lancement et des chips de suivi après chaque réponse
+
+### Settings
+
+- **FR50 :** Un membre CS peut consulter et modifier le nombre de lots de sa copropriété depuis les Settings
 
 ## Exigences Non-Fonctionnelles
 

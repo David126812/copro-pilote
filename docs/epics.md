@@ -130,11 +130,11 @@ Pas de document UX — les spécifications UX seront définies ultérieurement.
 - FR2 → Epic 1 (Story 1.2) — Liaison numéro/WhatsApp
 - FR3 → Epic 1 (Story 1.3) — Connexion
 - FR4 → Epic 1 (Story 1.3) — Persistance session
-- FR5 → Epic 2 (Story 2.1) — Stepper onboarding
+- FR5 → Epic 2 (Story 2.1) — Stepper 5 étapes
 - FR6 → Epic 2 (Story 2.1) — Explication visuelle
-- FR7 → Epic 2 (Story 2.3) — Instructions PWA
-- FR8 → Epic 2 (Story 2.2) — Profil + lots
-- FR9 → Epic 2 (Story 2.4) — Contact WhatsApp
+- FR7 → Epic 2 (Story 2.2) — Inscription + profil fusionnés
+- FR8 → Epic 2 (Story 2.3) — Instructions PWA
+- FR9 → Epic 2 (Story 2.4) — WhatsApp
 - FR10 → Epic 2 (Story 2.5) — Premier document
 - FR11 → Epic 3 (Story 3.1) — Forward WhatsApp
 - FR12 → Epic 3 (Story 3.2) — Création manuelle in-app
@@ -171,10 +171,13 @@ Pas de document UX — les spécifications UX seront définies ultérieurement.
 - FR42 → Epic 1 (Story 1.5) — Politique de confidentialité
 - FR43 → Epic 6 (Story 6.1) — Mention IA visible
 - FR44 → Epic 2 (Story 2.2) — Opt-in notifications
-- FR45 → Epic 9 (Story 9.1) — Chat texte avec l'assistant IA
-- FR46 → Epic 9 (Story 9.2) — Agent vocal
-- FR47 → Epic 9 (Story 9.3) — Recherche dans les dossiers
-- FR48 → Epic 9 (Story 9.3) — Actions proposées par l'assistant
+- FR45 → Epic 9 (Story 9.2) — Chat texte
+- FR46 → Epic 9 (Story 9.4) — Agent vocal (Whisper)
+- FR47 → Epic 9 (Story 9.1) — Edge Function assistant-query (RAG)
+- FR48 → Epic 9 (Story 9.3) — Actions contextuelles
+- FR49 → Epic 9 (Story 9.3) — Suggestions et chips
+- FR50 → Epic 2 (Story 2.2) / Settings — Nombre de lots
+- FR44 → Epic 2 (Story 2.2) — Opt-in notifications
 
 ## Epic List
 
@@ -212,7 +215,7 @@ L'administrateur peut pré-charger des dossiers dummy pour que les testeurs dém
 
 ### Epic 9: Assistant IA (Chat & Vocal)
 L'utilisateur peut interroger l'assistant IA pour retrouver rapidement une information sur ses dossiers, par texte ou par voix.
-**FRs couvertes:** FR45, FR46, FR47, FR48
+**FRs couvertes:** FR45, FR46, FR47, FR48, FR49
 
 ## Epic 1: Infrastructure & Authentification
 
@@ -303,25 +306,27 @@ So that **je sais à quoi m'attendre**.
 
 **Given** l'utilisateur vient de s'inscrire et arrive sur `/onboarding`
 **When** la page se charge
-**Then** un stepper affiche la progression (étape 1/6)
+**Then** un stepper affiche la progression (étape 1/5)
 **And** l'écran d'explication visuelle montre le flow : document → WhatsApp/app → dossier structuré
 **And** un bouton "Suivant" permet de passer à l'étape 2
 
-### Story 2.2: Profil, copropriété & opt-in notifications
+### Story 2.2: Inscription + profil fusionnés & opt-in
 
 As a **nouvel utilisateur**,
-I want **renseigner mon prénom, ma copropriété et accepter les notifications**,
-So that **l'app est personnalisée pour ma copro**.
+I want **créer mon compte et renseigner mon profil en une seule étape**,
+So that **je suis opérationnel rapidement**.
 
 **Acceptance Criteria:**
 
-**Given** l'utilisateur est à l'étape profil du stepper
-**When** il saisit son prénom, le nom de sa copropriété, et le nombre de lots (sélecteur +/−)
-**Then** une entrée est créée dans `coproprietes` (name, lots_count) si elle n'existe pas
-**And** le `profiles` est mis à jour avec `first_name` et `copro_id`
-**And** une checkbox opt-in notifications est affichée ("J'accepte de recevoir des notifications par WhatsApp et email")
-**And** le consentement est enregistré dans `profiles.notification_consent`
+**Given** l'utilisateur est à l'étape 2 du stepper
+**When** il remplit le formulaire fusionné
+**Then** les champs affichés sont : numéro de téléphone, mot de passe, email (optionnel), prénom, nom de copropriété, checkbox opt-in notifications
+**And** le formulaire est structuré visuellement en 2 blocs : "Votre compte" (numéro, mdp, email) puis "Votre profil" (prénom, copro, opt-in)
+**And** un compte Supabase Auth est créé
+**And** une entrée `coproprietes` est créée si elle n'existe pas
+**And** un `profiles` est créé avec `first_name`, `copro_id`, `whatsapp_phone`, `email`, `notification_consent`
 **And** PostHog identifie l'utilisateur : `posthog.identify(user.id)` + `posthog.group('copro', copro_name)`
+**And** en cas d'erreur, un message explicite s'affiche
 
 ### Story 2.3: Instructions d'installation PWA
 
@@ -331,7 +336,7 @@ So that **j'ai un accès rapide à Septrion**.
 
 **Acceptance Criteria:**
 
-**Given** l'utilisateur est à l'étape installation du stepper
+**Given** l'utilisateur est à l'étape 3 du stepper
 **When** la page se charge
 **Then** les instructions iOS (Partager → Sur l'écran d'accueil) et Android (Menu → Installer) sont affichées
 **And** un bouton "C'est fait" permet de passer à l'étape suivante
@@ -344,7 +349,7 @@ So that **je sais utiliser le canal principal d'ingestion**.
 
 **Acceptance Criteria:**
 
-**Given** l'utilisateur est à l'étape WhatsApp du stepper
+**Given** l'utilisateur est à l'étape 4 du stepper
 **When** la page se charge
 **Then** un contenu explicatif (texte, image ou vidéo) montre comment ajouter le contact Septrion et lui forwarder un document
 **And** le numéro WhatsApp Septrion est affiché avec un bouton "Copier le numéro"
@@ -358,7 +363,7 @@ So that **je commence à utiliser Septrion immédiatement**.
 
 **Acceptance Criteria:**
 
-**Given** l'utilisateur est à la dernière étape du stepper
+**Given** l'utilisateur est à l'étape 5 du stepper
 **When** la page se charge
 **Then** trois options sont présentées :
 1. **"Uploader un document"** — ouvre le sélecteur de fichier, le document est ingéré via le pipeline IA (Edge Function `analyze-document`), le signalement apparaît dans l'inbox
@@ -724,7 +729,23 @@ So that **le testeur démarre avec un dashboard peuplé et vit le moment retriev
 
 L'utilisateur peut interroger l'assistant IA pour retrouver rapidement une information sur ses dossiers, par texte ou par voix.
 
-### Story 9.1: Interface chat texte
+### Story 9.1: Edge Function assistant-query (prompt RAG)
+
+As a **développeur**,
+I want **une Edge Function qui répond aux questions en contexte**,
+So that **l'assistant IA a accès aux dossiers de la copro pour répondre**.
+
+**Acceptance Criteria:**
+
+**Given** une question utilisateur est envoyée à l'Edge Function `assistant-query` avec un `copro_id`
+**When** la fonction est exécutée
+**Then** elle charge tous les dossiers et signalements du `copro_id` (titres, résumés, statuts, urgences, timelines, dernières actions)
+**And** elle construit un prompt RAG avec le contexte + la question
+**And** elle appelle Claude Sonnet et retourne un JSON : `{ response, matched_dossiers: [{id, name, status}], suggested_actions: [{type, label, target}] }`
+**And** si aucun dossier ne correspond, `matched_dossiers` est vide et la réponse le mentionne
+**And** la fonction est dans `supabase/functions/assistant-query/`
+
+### Story 9.2: Interface chat texte
 
 As a **membre CS**,
 I want **poser une question par texte à l'assistant IA**,
@@ -732,39 +753,63 @@ So that **je retrouve l'info sur un dossier sans chercher manuellement**.
 
 **Acceptance Criteria:**
 
-**Given** l'utilisateur est sur la page assistant IA
-**When** il tape une question dans le champ de saisie (ex: "Où en est le dossier ascenseur ?")
-**Then** la question est envoyée à l'IA avec le contexte des dossiers de sa copro
-**And** l'assistant répond avec l'information demandée (résumé, statut, dernière action, responsable)
-**And** la conversation s'affiche dans un fil de discussion (bulles user/agent)
+**Given** l'utilisateur est sur la page `/assistant`
+**When** il tape une question dans le champ de saisie et envoie
+**Then** le message apparaît dans une bulle user (droite, fond primary)
+**And** un typing indicator s'affiche (3 dots animés bounce staggeré) pendant l'appel à `assistant-query`
+**And** la réponse de l'assistant apparaît avec animation (fade-in slide-in-from-left)
+**And** le délai du typing est proportionnel à la longueur de la réponse : `Math.min(1800, Math.max(700, text.length * 6))` ms
 **And** l'utilisateur peut poser des questions de suivi dans le même fil
+**And** l'historique est en mémoire React (stateless, pas de persistance)
 
-### Story 9.2: Agent vocal
+### Story 9.3: Suggestions, chips & actions contextuelles
 
 As a **membre CS**,
-I want **poser une question par la voix à l'assistant IA**,
-So that **je peux l'utiliser en mains libres**.
+I want **voir des suggestions de questions et des actions après chaque réponse**,
+So that **je sais quoi demander et je passe à l'action en un tap**.
 
 **Acceptance Criteria:**
 
-**Given** l'utilisateur est sur la page assistant IA
-**When** il appuie sur le bouton micro et parle
-**Then** la voix est transcrite en texte
-**And** la question transcrite est traitée comme un message texte (même pipeline que Story 9.1)
-**And** la réponse de l'assistant est affichée dans le fil de conversation
-**And** un indicateur visuel montre que l'enregistrement est en cours
+**Given** l'assistant vient de répondre
+**When** la réponse contient des dossiers identifiés (`matched_dossiers`)
+**Then** des boutons d'action s'affichent sous la réponse (pleine largeur, icône + label + description + chevron) : "Consulter le dossier", "Créer un signalement"
+**And** au tap sur "Consulter le dossier", l'utilisateur est redirigé vers `/dossiers/:id`
+**And** si aucun dossier ne correspond, l'assistant propose "Créer un signalement"
+**Given** c'est le premier lancement de l'assistant
+**When** la page se charge
+**Then** un message de bienvenue s'affiche + des chips de suggestions : "Où en est l'ascenseur ?", "Quels dossiers sont bloqués ?", "Résume la situation"
+**And** le tap sur un chip envoie la question comme si l'utilisateur l'avait tapée
 
-### Story 9.3: Recherche dans les dossiers & actions proposées
+### Story 9.4: Agent vocal (Whisper)
 
 As a **membre CS**,
-I want **que l'assistant retrouve le bon dossier et me propose des actions**,
-So that **je passe directement à l'action sans chercher**.
+I want **poser une question par la voix**,
+So that **je peux utiliser l'assistant en mains libres**.
 
 **Acceptance Criteria:**
 
-**Given** l'utilisateur a posé une question à l'assistant (texte ou voix)
-**When** l'assistant identifie un ou plusieurs dossiers correspondants
-**Then** il affiche les informations pertinentes du dossier (résumé, statut, urgence, dernière action)
-**And** il propose des actions contextuelles : "Consulter le dossier", "Créer un signalement"
-**And** au clic sur une action, l'utilisateur est redirigé vers la page correspondante
-**And** si aucun dossier ne correspond, l'assistant le dit et propose de créer un nouveau signalement
+**Given** l'utilisateur est sur la page `/assistant` en état idle (pas de conversation)
+**When** il appuie sur le bouton micro central (w-24 h-24)
+**Then** le bouton passe en mode enregistrement : scale-110, bg-primary, shadow glow bleu, icône micro pulsante
+**And** le texte affiche "Je vous écoute…"
+**When** l'enregistrement se termine (release ou timeout)
+**Then** l'audio est envoyé à l'API Whisper pour transcription
+**And** le texte transcrit est traité comme un message texte (même pipeline que Story 9.2)
+**And** en état de conversation (après la première question), le micro est dans la barre de saisie sticky en bas
+
+### Story 9.5: Animations et transitions (ref jhgu)
+
+As a **membre CS**,
+I want **une expérience fluide et engageante avec l'assistant**,
+So that **l'interaction se sent naturelle et pas robotique**.
+
+**Acceptance Criteria:**
+
+**Given** l'assistant répond à une question
+**When** la réponse arrive
+**Then** les bulles agent apparaissent avec `animate-in fade-in slide-in-from-left-2 duration-300`
+**And** le typing indicator utilise 3 dots avec `animate-bounce` et delays staggerés (0ms, 150ms, 300ms)
+**And** les chips/actions apparaissent uniquement sur le dernier message agent
+**And** en état idle : grand bouton micro central avec sous-texte explicatif
+**And** les success screens (après action) utilisent un overlay plein écran avec check vert + titre + CTA
+**And** les transitions entre états (idle → conversation → actions) sont fluides sans flash

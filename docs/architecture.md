@@ -182,6 +182,7 @@ create policy "Users see own copro data" on public.dossiers
 | `analyze-document` | Upload app → analyse IA → pré-remplissage champs ou signalement | À créer |
 | `send-notification` | Envoi WhatsApp sortant (template Meta) + email (Resend) au testeur | À créer |
 | `send-digest` | Résumé IA des dossiers actifs → notification WhatsApp + email | À créer |
+| `assistant-query` | Question utilisateur → charge contexte dossiers copro → prompt RAG → Claude → réponse + actions | À créer |
 
 **Fonction partagée :** `analyzeMessage()` — pipeline d'analyse IA utilisé par `whatsapp-webhook` et `analyze-document`.
 
@@ -233,9 +234,10 @@ Bouton "+" → page "Signaler un incident"
 ### Frontend
 
 - **PWA :** Manifest + Service Worker pour installabilité uniquement (pas de push, pas d'offline complexe)
-- **Onboarding :** Stepper 6 étapes — explication → inscription (numéro + mdp) → profil (prénom, copro, lots +/−) + opt-in notifications → install PWA → WhatsApp → premier document
+- **Onboarding :** Stepper 5 étapes — explication → inscription + profil fusionnés (numéro, mdp, email optionnel, prénom, copro, opt-in) → install PWA → WhatsApp → premier document. Lots dans Settings.
 - **Session :** Supabase Auth gère la session (JWT). Profil en base `profiles`.
 - **PostHog :** `posthog.identify(user.id)` après auth + `posthog.group('copro', copro_name)`
+- **Assistant IA :** Edge Function `assistant-query` (prompt RAG avec contexte dossiers). Speech-to-Text via Whisper API. Historique conversations stateless (React state en mémoire, pas de table en base).
 
 ### Infrastructure & Déploiement
 
@@ -456,6 +458,8 @@ copro-pilote/
 │       │   └── index.ts             ← NOUVEAU — WhatsApp + Resend
 │       ├── send-digest/
 │       │   └── index.ts             ← NOUVEAU
+│       ├── assistant-query/
+│       │   └── index.ts             ← NOUVEAU — prompt RAG + contexte dossiers
 │       └── _shared/
 │           ├── analyzeMessage.ts    ← NOUVEAU — pipeline IA partagé
 │           ├── sendWhatsApp.ts      ← NOUVEAU
@@ -527,7 +531,7 @@ WhatsApp/Upload → Edge Function → Supabase Storage + Claude API → INSERT s
 - [x] Contraintes techniques identifiées
 - [x] Authentification et sécurité décidées
 - [x] Modèle de données formalisé (tables, FK, RLS)
-- [x] Edge Functions définies (4 + _shared)
+- [x] Edge Functions définies (5 + _shared)
 - [x] Flux de communication documentés
 - [x] Notifications spécifiées (WhatsApp + email, loop solo)
 - [x] Patterns d'implémentation établis

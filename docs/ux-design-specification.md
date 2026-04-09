@@ -131,24 +131,23 @@ Pas de bottom nav. Écran plein. Logo Septrion en haut.
 
 ### 2. Onboarding (`/onboarding`)
 
-Pas de bottom nav. Stepper en haut (6 points, actif coloré).
+Pas de bottom nav. Stepper en haut (5 points, actif coloré).
 
 **Étape 1 — Explication visuelle :**
 Illustration/animation : document → Septrion → dossier structuré. Texte court 2 lignes. Bouton "Suivant".
 
-**Étape 2 — Profil :**
-- Prénom (obligatoire)
-- Nom copropriété (obligatoire)
-- Email (optionnel — pré-rempli si renseigné à l'inscription)
-- Nombre de lots — sélecteur +/− (défaut: 20, min: 1)
-- Checkbox opt-in notifications
-- Bouton "Suivant" (désactivé si prénom + copro vides)
+**Étape 2 — Inscription + profil fusionnés :**
+Deux blocs visuels sur le même écran :
+- Bloc "Votre compte" : numéro de téléphone, mot de passe (toggle visibilité), email (optionnel)
+- Bloc "Votre profil" : prénom, nom copropriété, checkbox opt-in notifications
+- Nombre de lots NON demandé ici (déplacé dans Settings)
+- Bouton "Créer mon compte" (désactivé si numéro + mdp + prénom + copro vides)
 
 **Étape 3 — Installation PWA :**
 Instructions visuelles iOS + Android. Bouton "C'est fait".
 
 **Étape 4 — WhatsApp :**
-Contenu explicatif (texte + image/vidéo) : comment forwarder un document. Numéro affiché + bouton "Copier". Bouton "Suivant".
+Contenu explicatif (texte + image/vidéo) : comment ajouter le contact et forwarder un document. Numéro affiché + bouton "Copier". Bouton "Suivant".
 
 **Étape 5 — Premier document :**
 Trois boutons en stack vertical :
@@ -276,7 +275,7 @@ Triée par updated_at desc. Chaque carte : titre, badge statut (bleu en_cours, r
 
 ### 9. Settings (`/settings`)
 
-Profil (lecture seule), toggle notifications, lien politique de confidentialité, mention IA, bouton déconnexion.
+Profil (prénom, copropriété — lecture seule), nombre de lots (sélecteur +/−, modifiable), toggle notifications, lien politique de confidentialité, mention IA, bouton déconnexion.
 
 ---
 
