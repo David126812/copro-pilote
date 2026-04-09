@@ -160,7 +160,6 @@ Pas de seuils de performance arbitraires. Le principe directeur est : **bien fai
 - Page publique de consultation dossier en lecture seule (lien partageable)
 - Email comme 2ème canal d'entrée
 - Rattachement IA suggeré dans l'inbox de triage
-- Résumé IA dynamique enrichi à chaque événement
 - Digest hebdo automatisé (cron Supabase)
 - Architecture multi-LLM (Claude + Mistral pour tâches secondaires)
 - Offre commerciale via budget de délégation CS (art. 21-2)
@@ -379,6 +378,7 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 - **FR27 :** Un membre CS peut consulter les documents attachés à un dossier
 - **FR28 :** Un membre CS peut voir le statut d'un dossier (en cours, bloqué, terminé)
 - **FR29 :** Un membre CS peut changer le statut d'un dossier (en cours ↔ bloqué ↔ terminé)
+- **FR29b :** Le système peut régénérer automatiquement le résumé IA d'un dossier quand un nouveau signalement y est rattaché — le résumé intègre l'ensemble des documents et événements du dossier
 
 ### Notifications & Communication
 
@@ -409,6 +409,13 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 - **FR42 :** L'utilisateur peut consulter la politique de confidentialité depuis l'app
 - **FR43 :** L'utilisateur peut voir une mention visible que les résumés sont générés par IA
 - **FR44 :** L'utilisateur peut donner son consentement explicite (opt-in) pour recevoir des notifications par WhatsApp et email lors de l'onboarding
+
+### Assistant IA
+
+- **FR45 :** Un membre CS peut poser une question à l'assistant IA par texte depuis l'app
+- **FR46 :** Un membre CS peut poser une question à l'assistant IA par la voix depuis l'app
+- **FR47 :** L'assistant IA peut rechercher dans les dossiers de la copropriété et fournir une réponse contextualisée (résumé, statut, dernière action, responsable)
+- **FR48 :** L'assistant IA peut proposer des actions suite à une question (consulter le dossier, créer un signalement)
 
 ## Exigences Non-Fonctionnelles
 

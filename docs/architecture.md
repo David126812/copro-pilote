@@ -183,7 +183,11 @@ create policy "Users see own copro data" on public.dossiers
 | `send-notification` | Envoi WhatsApp sortant (template Meta) + email (Resend) au testeur | À créer |
 | `send-digest` | Résumé IA des dossiers actifs → notification WhatsApp + email | À créer |
 
-**Fonction partagée :** `analyzeMessage()` — pipeline d'analyse IA utilisé par `whatsapp-webhook` et `analyze-document`. Produit :
+**Fonction partagée :** `analyzeMessage()` — pipeline d'analyse IA utilisé par `whatsapp-webhook` et `analyze-document`.
+
+**Fonction partagée :** `regenerateDossierSummary()` — appelée quand un signalement est rattaché à un dossier. Envoie à Claude le contexte complet du dossier (tous les signalements, documents, timeline) et régénère le résumé + prochaine action.
+
+`analyzeMessage()` produit :
 
 ```json
 {
