@@ -2,20 +2,20 @@
   "name": "CoPro Pilot",
   "short_name": "CoPro Pilot",
   "description": "Gérez les dossiers de votre copropriété en quelques secondes",
-  "start_url": "/copro-pilote/dashboard",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0a0f1a",
   "theme_color": "#2563eb",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/copro-pilote/icon-192.svg",
+      "src": "/icon-192.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/copro-pilote/icon-512.svg",
+      "src": "/icon-512.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any"

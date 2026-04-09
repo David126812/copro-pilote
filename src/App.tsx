@@ -83,7 +83,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter basename="/copro-pilote">
+      <BrowserRouter basename="/">
         <PhoneFrame>
           <Routes>
             <Route path="/" element={<Navigate to="/login" replace />} />
