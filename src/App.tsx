@@ -14,6 +14,7 @@ import Confirmation from "./pages/Confirmation";
 import SignalerIncident from "./pages/SignalerIncident";
 import Assistant from "./pages/Assistant";
 import VoiceAgent from "./pages/VoiceAgent";
+import AssistantIA from "./pages/AssistantIA";
 import Channels from "./pages/Channels";
 import Settings from "./pages/Settings";
 import PushSimulation from "./pages/PushSimulation";
@@ -100,8 +101,8 @@ const App = () => (
             <Route path="/dossiers/:id/confirmation" element={<AuthGuard><Confirmation /></AuthGuard>} />
             <Route path="/push-simulation" element={<AuthGuard><PushSimulation /></AuthGuard>} />
             <Route path="/signaler-incident" element={<AuthGuard><SignalerIncident /></AuthGuard>} />
-            <Route path="/assistant" element={<AuthGuard><Assistant /></AuthGuard>} />
-            <Route path="/voice-agent" element={<AuthGuard><VoiceAgent /></AuthGuard>} />
+            <Route path="/assistant" element={<AuthGuard><AssistantIA /></AuthGuard>} />
+            <Route path="/voice-agent" element={<AuthGuard><AssistantIA /></AuthGuard>} />
             <Route path="/channels" element={<AuthGuard><Channels /></AuthGuard>} />
             <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
             <Route path="/signalements" element={<AuthGuard><Signalements /></AuthGuard>} />
