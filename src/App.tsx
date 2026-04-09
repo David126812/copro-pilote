@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Auth from "./pages/Auth";
+import { AuthGuard } from "./components/auth/AuthGuard";
 import Dashboard from "./pages/Dashboard";
 import DossiersList from "./pages/DossiersList";
 import DossierDetail from "./pages/DossierDetail";
@@ -89,19 +90,19 @@ const App = () => (
             <Route path="/" element={<Navigate to="/auth" replace />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/login" element={<Navigate to="/auth" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dossiers" element={<DossiersList />} />
-            <Route path="/dossiers/:id" element={<DossierDetail />} />
-            <Route path="/dossiers/:id/update" element={<StatusUpdate />} />
-            <Route path="/dossiers/:id/confirmation" element={<Confirmation />} />
-            <Route path="/push-simulation" element={<PushSimulation />} />
-            <Route path="/signaler-incident" element={<SignalerIncident />} />
-            <Route path="/assistant" element={<Assistant />} />
-            <Route path="/voice-agent" element={<VoiceAgent />} />
-            <Route path="/channels" element={<Channels />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/signalements" element={<Signalements />} />
-            <Route path="/events" element={<Events />} />
+            <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
+            <Route path="/dossiers" element={<AuthGuard><DossiersList /></AuthGuard>} />
+            <Route path="/dossiers/:id" element={<AuthGuard><DossierDetail /></AuthGuard>} />
+            <Route path="/dossiers/:id/update" element={<AuthGuard><StatusUpdate /></AuthGuard>} />
+            <Route path="/dossiers/:id/confirmation" element={<AuthGuard><Confirmation /></AuthGuard>} />
+            <Route path="/push-simulation" element={<AuthGuard><PushSimulation /></AuthGuard>} />
+            <Route path="/signaler-incident" element={<AuthGuard><SignalerIncident /></AuthGuard>} />
+            <Route path="/assistant" element={<AuthGuard><Assistant /></AuthGuard>} />
+            <Route path="/voice-agent" element={<AuthGuard><VoiceAgent /></AuthGuard>} />
+            <Route path="/channels" element={<AuthGuard><Channels /></AuthGuard>} />
+            <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
+            <Route path="/signalements" element={<AuthGuard><Signalements /></AuthGuard>} />
+            <Route path="/events" element={<AuthGuard><Events /></AuthGuard>} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
