@@ -408,6 +408,7 @@ Le scope MVP est défini dans la section "Scope Produit" ci-dessus. Aucune featu
 
 - **FR42 :** L'utilisateur peut consulter la politique de confidentialité depuis l'app
 - **FR43 :** L'utilisateur peut voir une mention visible que les résumés sont générés par IA
+- **FR44 :** L'utilisateur peut donner son consentement explicite (opt-in) pour recevoir des notifications par WhatsApp et email lors de l'onboarding
 
 ## Exigences Non-Fonctionnelles
 
